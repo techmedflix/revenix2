@@ -1,0 +1,3023 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedOS v2 Interactive Product Demo</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --surface: #ffffff;
+      --surface-2: #f8fafd;
+      --line: #dde4ef;
+      --line-2: #ccd8ea;
+      --text: #162131;
+      --muted: #627086;
+      --brand: #0057ff;
+      --brand-2: #4d8dff;
+      --accent: #00a26d;
+      --warn: #de7d11;
+      --danger: #dc2a2a;
+      --shadow: 0 14px 40px rgba(14, 36, 73, 0.08);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "Satoshi", "Avenir Next", "Helvetica Neue", sans-serif;
+      background:
+        radial-gradient(1000px 500px at 110% -20%, rgba(77, 141, 255, 0.18), transparent 60%),
+        radial-gradient(800px 400px at -20% -30%, rgba(0, 162, 109, 0.12), transparent 60%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border-right: 1px solid var(--line);
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .logo {
+      margin-bottom: 20px;
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      font-weight: 760;
+    }
+
+    .logo h1 span {
+      color: var(--brand);
+    }
+
+    .subtle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid #c8dafd;
+      background: #edf4ff;
+      color: #1149b5;
+      padding: 4px 10px;
+      margin-top: 10px;
+    }
+
+    .nav {
+      margin-top: 20px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: left;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 640;
+    }
+
+    .nav button.active {
+      background: #edf4ff;
+      color: #0c3e9f;
+      border-color: #cfe0ff;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    }
+
+    .weights-card {
+      margin-top: 22px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .weights-card h4 {
+      margin: 0 0 10px 0;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .weights-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .weights-list li {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed #e5edf8;
+      padding-bottom: 4px;
+    }
+
+    .content {
+      padding: 22px 24px 28px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: -0.03em;
+      font-weight: 760;
+    }
+
+    .topbar p {
+      margin: 7px 0 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 70ch;
+    }
+
+    .chip {
+      border-radius: 999px;
+      border: 1px solid var(--line-2);
+      padding: 5px 10px;
+      font-size: 11px;
+      color: #3c4f6b;
+      background: #f6f9ff;
+      font-weight: 630;
+      white-space: nowrap;
+    }
+
+    .page {
+      display: none;
+      animation: fade 0.2s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(3px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid.four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .card h3 {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .kpi {
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      font-weight: 760;
+      margin: 0;
+    }
+
+    .kpi-sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 8px 11px;
+      cursor: pointer;
+      font-weight: 640;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(18, 44, 82, 0.12);
+    }
+
+    .btn.primary {
+      background: linear-gradient(145deg, var(--brand), #0049d4);
+      color: #fff;
+    }
+
+    .btn.soft {
+      border-color: var(--line-2);
+      background: #f5f9ff;
+      color: #274062;
+    }
+
+    .btn.warn {
+      background: #fff3e3;
+      border-color: #ffd6a7;
+      color: #8d4b06;
+    }
+
+    .btn.icon {
+      padding: 6px 9px;
+      min-width: 34px;
+      text-align: center;
+    }
+
+    .form-row {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-bottom: 8px;
+    }
+
+    .field {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .field label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 620;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      border: 1px solid var(--line-2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text);
+      width: 100%;
+      min-width: 0;
+    }
+
+    .field textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .table-select {
+      border: 1px solid var(--line-2);
+      border-radius: 9px;
+      padding: 7px 9px;
+      background: #f7faff;
+      color: #223754;
+      min-width: 132px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .pipeline-scroll {
+      max-height: 520px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 10px;
+      border-bottom: 1px solid #eef2f8;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f9fbff;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      text-transform: capitalize;
+    }
+
+    .pill.company { background: #f6ecff; color: #6935a5; border-color: #e6d6ff; }
+    .pill.cluster { background: #e8f3ff; color: #004caa; border-color: #cfe3ff; }
+    .pill.division { background: #e8fbf5; color: #08734e; border-color: #c7f0de; }
+    .pill.brand { background: #fff4e8; color: #9a5611; border-color: #ffdcb9; }
+
+    .pill.hot { background: #ffe9e9; color: #a61313; border-color: #ffc9c9; }
+    .pill.warm { background: #fff5e1; color: #9f6200; border-color: #ffdfae; }
+    .pill.cold { background: #edf3ff; color: #2455aa; border-color: #d2e2ff; }
+    .pill.hold { background: #f0f2f7; color: #556277; border-color: #d7dfea; }
+    .pill.lost { background: #f2f2f2; color: #666; border-color: #ddd; }
+    .pill.renewal { background: #e8fff8; color: #007a58; border-color: #c5f3e1; }
+    .pill.won { background: #e5fff2; color: #057f56; border-color: #bef2d7; }
+    .pill.invoiced { background: #e8efff; color: #153f9d; border-color: #ceddff; }
+
+    .tree {
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .tree-node {
+      margin: 4px 0;
+    }
+
+    .tree-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 1px solid #edf1f8;
+      border-radius: 9px;
+      background: #fcfdff;
+      cursor: pointer;
+    }
+
+    .tree-head strong {
+      font-size: 13px;
+      font-weight: 660;
+    }
+
+    .caret {
+      width: 16px;
+      color: #7a8ca7;
+      font-weight: 700;
+      text-align: center;
+      user-select: none;
+    }
+
+    .children {
+      margin-left: 18px;
+      border-left: 1px dashed #d7e3f5;
+      padding-left: 8px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .children.open {
+      display: block;
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .bar-label {
+      width: 170px;
+      font-size: 12px;
+      color: #384d6d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 10px;
+      border-radius: 999px;
+      background: #eaf1fb;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+    }
+
+    .bar-value {
+      width: 100px;
+      text-align: right;
+      font-size: 12px;
+      color: #435878;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .muted-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 20, 35, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: min(640px, 100%);
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #dce7f8;
+      box-shadow: 0 24px 48px rgba(16, 29, 56, 0.24);
+      padding: 16px;
+    }
+
+    .modal-box.wide {
+      width: min(920px, 100%);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .modal-head h4 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .close {
+      border: 1px solid #dce6f4;
+      background: #f7faff;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .form-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .grid.two,
+      .grid.three,
+      .grid.four {
+        grid-template-columns: 1fr;
+      }
+      .topbar h2 {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .content {
+        padding: 14px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <h1>Med<span>OS</span> v2</h1>
+        <div class="subtle">Product Validation Prototype</div>
+        <div class="demo-badge">Interactive HTML · Dummy Data</div>
+      </div>
+
+      <nav class="nav" id="navTabs">
+        <button class="active" data-page="leadership">🧭 Dashboard</button>
+        <button data-page="opportunities">📈 Order Book</button>
+        <button data-page="finance">🧾 Invoicing</button>
+        <button data-page="ledger">📚 Cost Ledger</button>
+        <button data-page="accounts">🏢 Accounts and Hierarchy</button>
+      </nav>
+
+      <div class="weights-card">
+        <h4>Locked Stage Weights</h4>
+        <ul class="weights-list" id="weightList"></ul>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageDesc">Unified pipeline, invoicing, ledger, and runway analytics with editable OPEX control.</p>
+        </div>
+        <span class="chip" id="fyChip">Default FY: -</span>
+      </div>
+
+      <!-- Accounts Page -->
+      <section class="page" id="page-accounts">
+        <div class="grid two">
+          <div class="card">
+            <h3>Hierarchy Tree (Corrected)</h3>
+            <div class="toolbar">
+              <input id="accountSearch" type="text" placeholder="Search account / division..." />
+              <button class="btn soft" id="expandAllBtn">Expand all</button>
+              <button class="btn soft" id="collapseAllBtn">Collapse all</button>
+            </div>
+            <div class="tree" id="accountTree"></div>
+          </div>
+          <div class="card">
+            <h3>Hierarchy Quality Check</h3>
+            <div id="hierarchySummary" class="muted-note"></div>
+            <div style="margin-top: 12px;">
+              <h3 style="margin-bottom:8px;">Business Rules Applied</h3>
+              <ul style="margin:0; padding-left:18px; font-size:13px; color:#324a69; line-height:1.55;">
+                <li>Sun Pharma → CVD (Cluster) → Akuna, Amaze, Arian, Avior as <strong>Division</strong>.</li>
+                <li>Alkem → Pentacare, Prizma, Suprema mapped as <strong>Division</strong>.</li>
+                <li>Hierarchy validation blocks invalid parent-child order.</li>
+              </ul>
+            </div>
+            <div style="margin-top: 14px;">
+              <h3 style="margin-bottom:8px;">Proposed Admin Actions</h3>
+              <div class="table-wrap">
+                <table style="min-width:100%;">
+                  <thead>
+                    <tr>
+                      <th>Node</th>
+                      <th>Current Type</th>
+                      <th>Parent</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminFixRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Opportunities Page -->
+      <section class="page" id="page-opportunities">
+        <div class="grid four" id="opportunityKpis"></div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="toolbar" style="justify-content:space-between;">
+            <div class="toolbar" style="margin-bottom:0;">
+              <button class="btn primary" id="openOpportunityModalBtn">Create Opportunity</button>
+              <button class="btn soft" id="openLogModalBtn">+ Log</button>
+            </div>
+            <div class="toolbar" style="margin-bottom:0;">
+              <select id="filterCompany"></select>
+              <select id="filterDivision"></select>
+              <label class="chip" style="display:flex; align-items:center; gap:6px;">
+                <input id="filterCallsToday" type="checkbox" />
+                Calls Due Today
+              </label>
+            </div>
+          </div>
+          <h3>Opportunity Pipeline</h3>
+          <div class="table-wrap pipeline-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Opportunity</th>
+                  <th>Company</th>
+                  <th>Division</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Est. Value</th>
+                  <th>Est. Cost</th>
+                  <th>Stage</th>
+                  <th>Weight</th>
+                  <th>Weighted</th>
+                  <th>Next Call Date</th>
+                  <th>Closed Value</th>
+                  <th>Delta</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="opportunityRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Finance Page -->
+      <section class="page" id="page-finance">
+        <div class="toolbar">
+          <button class="btn primary" id="newInvoiceBtn">Create Invoice</button>
+          <button class="btn warn" id="refreshCashflowBtn">Refresh Cashflow View</button>
+        </div>
+
+        <div class="grid three">
+          <div class="card">
+            <h3>Receivables</h3>
+            <p class="kpi" id="recvKpi">₹0</p>
+            <div class="kpi-sub" id="recvSub">-</div>
+          </div>
+          <div class="card">
+            <h3>Collections This FY</h3>
+            <p class="kpi" id="collectionKpi">₹0</p>
+            <div class="kpi-sub">Includes TDS and GST-withheld records</div>
+          </div>
+          <div class="card">
+            <h3>Vendor Outflow</h3>
+            <p class="kpi" id="outflowKpi">₹0</p>
+            <div class="kpi-sub">From approved ledger entries</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Invoice Tracking (Collections Control)</h3>
+          <div class="toolbar">
+            <input id="invoiceSearch" type="text" placeholder="Search invoice no / PO / description..." />
+            <select id="invoiceEntityFilter"></select>
+            <select id="invoiceStatusFilter"></select>
+            <select id="invoiceOfferingFilter"></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Invoice #</th>
+                  <th>Entity</th>
+                  <th>Doc Type</th>
+                  <th>Company / Division</th>
+                  <th>Offering</th>
+                  <th>Expected FY</th>
+                  <th>Invoice Date</th>
+                  <th>Due Date</th>
+                  <th>Credit Days</th>
+                  <th>Expected Payment</th>
+                  <th>Currency</th>
+                  <th>Gross (INR)</th>
+                  <th>Discount (INR)</th>
+                  <th>Net (INR)</th>
+                  <th>GST</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Amount Pending</th>
+                  <th>TDS %</th>
+                  <th>GST Withheld</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:12px;">
+          <div class="card">
+            <h3>Expected Collections by Month</h3>
+            <div id="collectionsBars"></div>
+          </div>
+          <div class="card">
+            <h3>Expected Net Cash by Month</h3>
+            <div id="netCashBars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ledger Page -->
+      <section class="page" id="page-ledger">
+        <div class="grid two">
+          <div class="card">
+            <h3>Cost Master (Centres & Heads)</h3>
+            <div class="form-row" style="grid-template-columns: repeat(2,minmax(0,1fr));">
+              <div class="field">
+                <label>Create / Edit Cost Centre</label>
+                <input id="newCenterName" placeholder="e.g. Medical Affairs" />
+              </div>
+              <div class="field">
+                <label>Create / Edit Cost Head</label>
+                <input id="newHeadName" placeholder="e.g. Venue Advance" />
+              </div>
+            </div>
+            <div class="toolbar">
+              <button class="btn soft" id="addCenterBtn">Create/Edit Cost Centres</button>
+              <button class="btn soft" id="addHeadBtn">Create/Edit Cost Heads</button>
+            </div>
+            <div class="grid two" style="margin-top:8px;">
+              <div class="table-wrap">
+                <table style="min-width:100%;">
+                  <thead><tr><th>Cost Centres</th></tr></thead>
+                  <tbody id="centerRows"></tbody>
+                </table>
+              </div>
+              <div class="table-wrap">
+                <table style="min-width:100%;">
+                  <thead><tr><th>Cost Heads</th></tr></thead>
+                  <tbody id="headRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Upload Invoice To Be Paid (Team Submission)</h3>
+            <div class="form-row" style="grid-template-columns: repeat(2,minmax(0,1fr));">
+              <div class="field">
+                <label>Cost Centre</label>
+                <select id="ledgerCenter"></select>
+              </div>
+              <div class="field">
+                <label>Cost Head</label>
+                <select id="ledgerHead"></select>
+              </div>
+            </div>
+            <div class="form-row" style="grid-template-columns: repeat(3,minmax(0,1fr));">
+              <div class="field">
+                <label>Amount</label>
+                <input id="ledgerAmount" type="number" value="25000" min="0" />
+              </div>
+              <div class="field">
+                <label>Invoice Date</label>
+                <input id="ledgerDate" type="date" />
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select id="ledgerStatus">
+                  <option>submitted</option>
+                  <option>approved</option>
+                  <option>paid</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Invoice File (Demo only)</label>
+              <input id="ledgerFile" type="file" />
+            </div>
+            <div class="toolbar" style="margin-top:8px;">
+              <button class="btn primary" id="addLedgerBtn">Add Ledger Entry</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:12px;">
+          <div class="card">
+            <h3>Monthly Cost by Centre</h3>
+            <div id="costCentreBars"></div>
+          </div>
+          <div class="card">
+            <h3>Monthly Cost by Head</h3>
+            <div id="costHeadBars"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Payables Ledger</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Centre</th>
+                  <th>Head</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Attachment</th>
+                </tr>
+              </thead>
+              <tbody id="ledgerRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Leadership Page -->
+      <section class="page active" id="page-leadership">
+        <div class="card">
+          <h3>Runway Controls</h3>
+          <div class="form-row" style="grid-template-columns: repeat(4,minmax(0,1fr));">
+            <div class="field">
+              <label>Monthly OPEX (INR)</label>
+              <input id="opexInput" type="number" min="1" value="3500000" />
+            </div>
+            <div class="field">
+              <label>Current Cash (INR)</label>
+              <input id="cashInput" type="number" min="0" value="24000000" />
+            </div>
+            <div class="field">
+              <label>View FY</label>
+              <select id="leadFy"></select>
+            </div>
+            <div class="field">
+              <label>Apply</label>
+              <button class="btn primary" id="applyLeadershipBtn">Recalculate</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid four" style="margin-top:12px;" id="leadKpis"></div>
+
+        <div class="grid two" style="margin-top:12px;">
+          <div class="card">
+            <h3>Pipeline by Stage (Weighted)</h3>
+            <div id="pipelineBars"></div>
+          </div>
+          <div class="card">
+            <h3>Revenue by Division</h3>
+            <div id="divisionBars"></div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:12px;">
+          <div class="card">
+            <h3>Revenue by Account</h3>
+            <div id="accountBars"></div>
+          </div>
+          <div class="card">
+            <h3>Revenue by Offering Type</h3>
+            <div id="offeringBars"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3>Combined Cash Risk Snapshot</h3>
+          <p class="muted-note" id="cashRiskNote"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal: create opportunity -->
+  <div class="modal" id="opportunityModal">
+    <div class="modal-box wide">
+      <div class="modal-head">
+        <h4>Create Opportunity</h4>
+        <button class="close" id="closeOpportunityModal">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Company</label>
+          <select id="oppCompany"></select>
+        </div>
+        <div class="field">
+          <label>Division</label>
+          <select id="oppDivision"></select>
+        </div>
+        <div class="field">
+          <label>Project Category</label>
+          <select id="oppCategory">
+            <option>Virtual Events</option>
+            <option>Hybrid Events</option>
+            <option>F2f Events</option>
+            <option>Research</option>
+            <option>Content</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Project Type</label>
+          <select id="oppType">
+            <option>Webinar</option>
+            <option>Conference</option>
+            <option>Advisory Board</option>
+            <option>CME Workshop</option>
+            <option>FGD</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Estimated Value (INR)</label>
+          <input id="oppValue" type="number" value="1200000" min="0" />
+        </div>
+        <div class="field">
+          <label>Estimated Cost (INR)</label>
+          <input id="oppCost" type="number" value="780000" min="0" />
+        </div>
+        <div class="field">
+          <label>Stage Signal</label>
+          <select id="oppStage"></select>
+        </div>
+        <div class="field">
+          <label>Expected Revenue FY</label>
+          <select id="oppFy"></select>
+        </div>
+      </div>
+      <div class="toolbar" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn soft" id="cancelOpportunityModal">Cancel</button>
+        <button class="btn primary" id="saveOpportunityModal">Create Opportunity</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: log CRM activity -->
+  <div class="modal" id="logModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h4>Log CRM Activity</h4>
+        <button class="close" id="closeLogModal">✕</button>
+      </div>
+      <div class="field">
+        <label>Opportunity</label>
+        <select id="activityOpp"></select>
+      </div>
+      <div class="form-row" style="grid-template-columns: repeat(2,minmax(0,1fr)); margin-top:8px;">
+        <div class="field">
+          <label>Activity Type</label>
+          <select id="activityType">
+            <option>call_attempted</option>
+            <option>call_connected</option>
+            <option>callback_later</option>
+            <option>meeting_scheduled</option>
+            <option>meeting_done</option>
+            <option>proposal_sent</option>
+            <option>proposal_revised</option>
+            <option>po_received</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Outcome</label>
+          <select id="activityOutcome">
+            <option>positive</option>
+            <option>neutral</option>
+            <option>budget_issue</option>
+            <option>no_response</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="nextCallDateWrap">
+        <label>Next Call Date</label>
+        <input id="nextCallDateInput" type="date" />
+      </div>
+      <div class="field" style="margin-top:8px;">
+        <label>Notes</label>
+        <textarea id="activityNotes" placeholder="Add context for sales and leadership review"></textarea>
+      </div>
+      <div class="toolbar" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn soft" id="cancelLogModal">Cancel</button>
+        <button class="btn primary" id="saveLogModal">Save Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: opportunity log history -->
+  <div class="modal" id="activityHistoryModal">
+    <div class="modal-box wide">
+      <div class="modal-head">
+        <h4 id="activityHistoryTitle">CRM Log Details</h4>
+        <button class="close" id="closeActivityHistoryModal">✕</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date/Time</th>
+              <th>Type</th>
+              <th>Outcome</th>
+              <th>Next Call</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="activityHistoryRows"></tbody>
+        </table>
+      </div>
+      <div class="toolbar" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn soft" id="doneActivityHistoryModal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: stage close value -->
+  <div class="modal" id="stageModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h4>Capture Closed Value</h4>
+        <button class="close" id="closeStageModal">✕</button>
+      </div>
+      <p class="muted-note" id="stageModalText"></p>
+      <div class="form-row" style="grid-template-columns: repeat(2,minmax(0,1fr)); margin-top:10px;">
+        <div class="field">
+          <label>Closed Value (INR)</label>
+          <input type="number" min="0" id="closedValueInput" />
+        </div>
+        <div class="field">
+          <label>Remarks</label>
+          <input id="closedRemarkInput" placeholder="Negotiation/discount reason" />
+        </div>
+      </div>
+      <div class="toolbar" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn soft" id="cancelStageModal">Cancel</button>
+        <button class="btn primary" id="saveStageModal">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: create invoice -->
+  <div class="modal" id="invoiceModal">
+    <div class="modal-box wide">
+      <div class="modal-head">
+        <h4>Create Invoice</h4>
+        <button class="close" id="closeInvoiceModal">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Entity</label>
+          <select id="invoiceEntity">
+            <option>PMD</option>
+            <option selected>Medflix</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Invoice Type</label>
+          <select id="invoiceType">
+            <option>Regular</option>
+            <option>Proforma Invoice</option>
+            <option>Credit Note</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Doc Type</label>
+          <select id="invoiceDocType">
+            <option>INV</option>
+            <option>PI</option>
+            <option>QUOTE</option>
+            <option>CN</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Invoice Number</label>
+          <input id="invoiceNo" placeholder="e.g. MDF/INV/26-0041" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Linked PI</label>
+          <input id="invoiceLinkedPi" placeholder="Optional PI reference" />
+        </div>
+        <div class="field">
+          <label>PO Number</label>
+          <input id="invoicePo" placeholder="Client PO / WO number" />
+        </div>
+        <div class="field">
+          <label>Offering Category</label>
+          <select id="invoiceCategory"></select>
+        </div>
+        <div class="field">
+          <label>Offering Type</label>
+          <select id="invoiceOffering"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Company</label>
+          <select id="invoiceCompany"></select>
+        </div>
+        <div class="field">
+          <label>Division</label>
+          <select id="invoiceDivision"></select>
+        </div>
+        <div class="field">
+          <label>Linked Opportunity</label>
+          <select id="invoiceOpp"></select>
+        </div>
+        <div class="field">
+          <label>Expected FY</label>
+          <select id="invoiceFy"></select>
+        </div>
+        <div class="field">
+          <label>SAC / HSN</label>
+          <input id="invoiceSac" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Invoice Date</label>
+          <input id="invoiceDate" type="date" />
+        </div>
+        <div class="field">
+          <label>Due Date</label>
+          <input id="invoiceDueDate" type="date" />
+        </div>
+        <div class="field">
+          <label>Expected Payment Date</label>
+          <input id="invoiceExpectedPaymentDate" type="date" />
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="invoiceStatus">
+            <option value="draft">draft</option>
+            <option value="sent" selected>sent</option>
+            <option value="unpaid">unpaid</option>
+            <option value="overdue">overdue</option>
+            <option value="cancelled">cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Client GSTIN</label>
+          <input id="invoiceClientGstin" placeholder="Client GSTIN" />
+        </div>
+        <div class="field">
+          <label>State</label>
+          <input id="invoiceClientState" placeholder="State" />
+        </div>
+        <div class="field">
+          <label>Credit Days</label>
+          <input id="invoiceCreditDays" type="number" min="0" value="45" />
+        </div>
+        <div class="field">
+          <label>Currency</label>
+          <select id="invoiceCurrency">
+            <option value="INR">INR</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="AED">AED</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>FX Rate to INR</label>
+          <input id="invoiceFxRate" type="number" step="0.01" min="0" value="1" />
+        </div>
+        <div class="field">
+          <label>Gross (Currency)</label>
+          <input id="invoiceGross" type="number" min="0" value="500000" />
+        </div>
+        <div class="field">
+          <label>Discount (Currency)</label>
+          <input id="invoiceDiscount" type="number" min="0" value="0" />
+        </div>
+        <div class="field">
+          <label>Net Pre-Tax (INR)</label>
+          <input id="invoicePreTax" type="number" readonly />
+        </div>
+      </div>
+      <div class="form-row" style="grid-template-columns: repeat(4,minmax(0,1fr));">
+        <div class="field">
+          <label>GST %</label>
+          <input id="invoiceGstRate" type="number" min="0" step="0.01" value="18" />
+        </div>
+        <div class="field">
+          <label>GST Value (INR)</label>
+          <input id="invoiceGstValue" type="number" readonly />
+        </div>
+        <div class="field">
+          <label>Total Invoice (INR)</label>
+          <input id="invoiceTotalValue" type="number" readonly />
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <input id="invoiceDesc" placeholder="Service particulars for invoice" />
+        </div>
+      </div>
+      <div class="toolbar" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn soft" id="cancelInvoiceModal">Cancel</button>
+        <button class="btn primary" id="saveInvoiceModal">Create Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: invoice payment -->
+  <div class="modal" id="paymentModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h4>Mark Invoice as Received</h4>
+        <button class="close" id="closePaymentModal">✕</button>
+      </div>
+      <p class="muted-note" id="paymentModalText"></p>
+      <div class="form-row" style="grid-template-columns: repeat(3,minmax(0,1fr)); margin-top:10px;">
+        <div class="field">
+          <label>Receive Type</label>
+          <select id="paymentType">
+            <option value="received_full">Received Full</option>
+            <option value="received_partial">Received Partial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>TDS % (Pre-tax)</label>
+          <select id="tdsPreset">
+            <option value="0">0</option>
+            <option value="2" selected>2</option>
+            <option value="10">10</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>GST Withheld?</label>
+          <select id="gstWithheldFlag">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="grid-template-columns: repeat(2,minmax(0,1fr));">
+        <div class="field" id="tdsCustomWrap" style="display:none;">
+          <label>Custom TDS %</label>
+          <input type="number" id="tdsCustom" value="0" min="0" step="0.01" />
+        </div>
+        <div class="field" id="partialAmountWrap" style="display:none;">
+          <label>Amount Received (Partial)</label>
+          <input type="number" id="partialAmount" value="0" min="0" step="0.01" />
+        </div>
+        <div class="field">
+          <label>Received Date</label>
+          <input type="date" id="receivedDate" />
+        </div>
+      </div>
+      <div class="card" style="margin-top:8px; background:#f8fbff;">
+        <div class="muted-note" id="paymentCalcSummary"></div>
+      </div>
+      <div class="toolbar" style="justify-content:flex-end; margin-top:10px;">
+        <button class="btn soft" id="cancelPaymentModal">Cancel</button>
+        <button class="btn primary" id="savePaymentModal">Save Collection</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const stageWeights = {
+      invoiced: 1,
+      won: 0.9,
+      renewal: 0.4,
+      hot: 0.25,
+      warm: 0.1,
+      cold: 0.05,
+      hold: 0,
+      lost: 0
+    };
+
+    const stageLabels = {
+      invoiced: "Invoiced",
+      won: "Won - Commissioned",
+      renewal: "Renewal",
+      hot: "Hot",
+      warm: "Warm",
+      cold: "Cold",
+      hold: "Hold",
+      lost: "Lost"
+    };
+
+    const validStages = Object.keys(stageWeights);
+    const activeStages = ["hot", "warm", "cold", "renewal", "won", "invoiced"];
+    const fxRates = { INR: 1, USD: 84.5, EUR: 91.2, GBP: 107.3, AED: 23 };
+    const offeringCatalog = {
+      "Virtual Events": [
+        { name: "Webinar", sac: "9983", gstRate: 18 },
+        { name: "Conference", sac: "9983", gstRate: 18 },
+        { name: "Advisory Board", sac: "9983", gstRate: 18 }
+      ],
+      "Hybrid Events": [
+        { name: "Hybrid Conference", sac: "9983", gstRate: 18 },
+        { name: "Hybrid Workshop", sac: "9983", gstRate: 18 }
+      ],
+      "F2f Events": [
+        { name: "CME Workshop", sac: "9983", gstRate: 18 },
+        { name: "FGD", sac: "9983", gstRate: 18 },
+        { name: "Physical Conference", sac: "9983", gstRate: 18 }
+      ],
+      "Research": [
+        { name: "Form-based", sac: "9983", gstRate: 18 },
+        { name: "Telephonic", sac: "9983", gstRate: 18 },
+        { name: "Video", sac: "9983", gstRate: 18 },
+        { name: "In-person", sac: "9983", gstRate: 18 }
+      ],
+      "Content Services": [
+        { name: "Scientific Deck", sac: "9983", gstRate: 18 },
+        { name: "Medical Content Package", sac: "9983", gstRate: 18 }
+      ]
+    };
+    const companyInvoiceMeta = {
+      sun: { gstin: "27AAACS0229G1ZO", state: "Maharashtra", creditDays: 45 },
+      alkem: { gstin: "27AAACA3088L1ZU", state: "Maharashtra", creditDays: 45 },
+      pfizer: { gstin: "27AAACP2931L1ZO", state: "Maharashtra", creditDays: 45 },
+      cipla: { gstin: "27AAACC2310A1ZZ", state: "Maharashtra", creditDays: 45 },
+      takeda: { gstin: "27AAACT5858R1Z6", state: "Maharashtra", creditDays: 45 }
+    };
+
+    function inr(v) {
+      return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v || 0);
+    }
+
+    function compact(v) {
+      if (v >= 10000000) return "₹" + (v / 10000000).toFixed(2) + "Cr";
+      if (v >= 100000) return "₹" + (v / 100000).toFixed(2) + "L";
+      if (v >= 1000) return "₹" + (v / 1000).toFixed(1) + "K";
+      return "₹" + Math.round(v || 0);
+    }
+
+    function pct(v) {
+      return Number(v || 0).toFixed(2) + "%";
+    }
+
+    function asDate(input) {
+      if (!input) return new Date();
+      if (input instanceof Date) return new Date(input.getFullYear(), input.getMonth(), input.getDate());
+      const [y, m, d] = String(input).split("-").map((x) => Number(x));
+      return new Date(y || 2000, (m || 1) - 1, d || 1);
+    }
+
+    function toIsoDate(input) {
+      const d = asDate(input);
+      const yy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yy}-${mm}-${dd}`;
+    }
+
+    function isoToday() {
+      return toIsoDate(new Date());
+    }
+
+    function formatDate(input) {
+      if (!input) return "—";
+      const d = asDate(input);
+      return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    function formatDateTime(input) {
+      if (!input) return "—";
+      const d = new Date(input);
+      return d.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+    }
+
+    function addCalendarDays(baseDate, days) {
+      const d = asDate(baseDate);
+      d.setDate(d.getDate() + days);
+      return toIsoDate(d);
+    }
+
+    function addBusinessDays(baseDate, days) {
+      const d = asDate(baseDate);
+      let added = 0;
+      while (added < days) {
+        d.setDate(d.getDate() + 1);
+        const weekday = d.getDay();
+        if (weekday !== 0 && weekday !== 6) {
+          added += 1;
+        }
+      }
+      return toIsoDate(d);
+    }
+
+    function sameDate(a, b) {
+      return toIsoDate(a) === toIsoDate(b);
+    }
+
+    function getFyOptions(now = new Date()) {
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const fyStart = month >= 4 ? year : year - 1;
+      const prev = `FY ${String(fyStart - 1).slice(2)}-${String(fyStart).slice(2)}`;
+      const current = `FY ${String(fyStart).slice(2)}-${String(fyStart + 1).slice(2)}`;
+      const next = `FY ${String(fyStart + 1).slice(2)}-${String(fyStart + 2).slice(2)}`;
+      return { prev, current, next, all: [prev, current, next] };
+    }
+
+    const fySet = getFyOptions();
+    document.getElementById("fyChip").textContent = `Default FY: ${fySet.current}`;
+
+    const hierarchy = [
+      {
+        id: "sun",
+        name: "Sun Pharma",
+        type: "company",
+        children: [
+          {
+            id: "sun-cvd",
+            name: "CVD",
+            type: "cluster",
+            children: [
+              { id: "sun-akuna", name: "Akuna", type: "division", children: [] },
+              { id: "sun-amaze", name: "Amaze", type: "division", children: [] },
+              { id: "sun-arian", name: "Arian", type: "division", children: [] },
+              { id: "sun-avior", name: "Avior", type: "division", children: [] }
+            ]
+          }
+        ]
+      },
+      {
+        id: "alkem",
+        name: "Alkem",
+        type: "company",
+        children: [
+          { id: "alkem-prizma", name: "Prizma", type: "division", children: [] },
+          { id: "alkem-pentacare", name: "Pentacare", type: "division", children: [] },
+          { id: "alkem-suprema", name: "Suprema", type: "division", children: [] }
+        ]
+      },
+      {
+        id: "pfizer",
+        name: "Pfizer",
+        type: "company",
+        children: [
+          { id: "pfizer-im", name: "IM", type: "division", children: [] },
+          { id: "pfizer-onco", name: "Onco", type: "division", children: [] }
+        ]
+      },
+      {
+        id: "cipla",
+        name: "Cipla",
+        type: "company",
+        children: [
+          { id: "cipla-digital", name: "Digital", type: "division", children: [] },
+          { id: "cipla-bi", name: "BI", type: "division", children: [] },
+          { id: "cipla-cvd", name: "CVD", type: "division", children: [] },
+          { id: "cipla-cns", name: "CNS", type: "division", children: [] }
+        ]
+      },
+      {
+        id: "takeda",
+        name: "Takeda",
+        type: "company",
+        children: [
+          { id: "takeda-rare", name: "Rare Diseases", type: "division", children: [] },
+          { id: "takeda-gi", name: "GI", type: "division", children: [] },
+          { id: "takeda-vaccines", name: "Vaccines", type: "division", children: [] }
+        ]
+      }
+    ];
+
+    function flattenNodes(nodes, parent = null, out = []) {
+      nodes.forEach((n) => {
+        out.push({
+          id: n.id,
+          name: n.name,
+          type: n.type,
+          parentId: parent ? parent.id : null,
+          parentName: parent ? parent.name : null
+        });
+        flattenNodes(n.children || [], n, out);
+      });
+      return out;
+    }
+
+    const flatAccounts = flattenNodes(hierarchy);
+    const companies = flatAccounts.filter((x) => x.type === "company");
+    const divisionsByCompany = {};
+    companies.forEach((c) => {
+      const descendants = flatAccounts.filter((a) => {
+        let current = a;
+        while (current && current.parentId) {
+          const p = flatAccounts.find((z) => z.id === current.parentId);
+          if (!p) break;
+          if (p.id === c.id) return true;
+          current = p;
+        }
+        return false;
+      });
+      divisionsByCompany[c.id] = descendants.filter((d) => d.type === "division");
+    });
+
+    let opportunities = [
+      {
+        id: "OPP-101",
+        companyId: "sun",
+        divisionId: "sun-amaze",
+        category: "Virtual Events",
+        type: "Webinar",
+        estimatedValue: 1200000,
+        estimatedCost: 720000,
+        stage: "hot",
+        expectedFY: fySet.current,
+        closedValue: null,
+        closeRemark: "",
+        nextCallDate: addBusinessDays(isoToday(), 1)
+      },
+      {
+        id: "OPP-102",
+        companyId: "alkem",
+        divisionId: "alkem-prizma",
+        category: "Hybrid Events",
+        type: "Conference",
+        estimatedValue: 2400000,
+        estimatedCost: 1540000,
+        stage: "warm",
+        expectedFY: fySet.current,
+        closedValue: null,
+        closeRemark: "",
+        nextCallDate: addBusinessDays(isoToday(), 3)
+      },
+      {
+        id: "OPP-103",
+        companyId: "pfizer",
+        divisionId: "pfizer-im",
+        category: "Virtual Events",
+        type: "Advisory Board",
+        estimatedValue: 1800000,
+        estimatedCost: 1100000,
+        stage: "won",
+        expectedFY: fySet.current,
+        closedValue: 1640000,
+        closeRemark: "Scope reduced in final PO",
+        nextCallDate: null
+      },
+      {
+        id: "OPP-104",
+        companyId: "takeda",
+        divisionId: "takeda-vaccines",
+        category: "F2f Events",
+        type: "CME Workshop",
+        estimatedValue: 1550000,
+        estimatedCost: 1020000,
+        stage: "renewal",
+        expectedFY: fySet.next,
+        closedValue: null,
+        closeRemark: "",
+        nextCallDate: addBusinessDays(isoToday(), 2)
+      },
+      {
+        id: "OPP-105",
+        companyId: "cipla",
+        divisionId: "cipla-cvd",
+        category: "Research",
+        type: "FGD",
+        estimatedValue: 900000,
+        estimatedCost: 650000,
+        stage: "cold",
+        expectedFY: fySet.current,
+        closedValue: null,
+        closeRemark: "",
+        nextCallDate: addBusinessDays(isoToday(), 4)
+      },
+      {
+        id: "OPP-106",
+        companyId: "sun",
+        divisionId: "sun-arian",
+        category: "Virtual Events",
+        type: "Webinar",
+        estimatedValue: 1100000,
+        estimatedCost: 700000,
+        stage: "invoiced",
+        expectedFY: fySet.current,
+        closedValue: 1090000,
+        closeRemark: "Invoiced at 1.09M",
+        nextCallDate: null
+      }
+    ];
+
+    let activities = [
+      {
+        id: "ACT-1",
+        dateTime: new Date().toISOString(),
+        oppId: "OPP-101",
+        type: "meeting_done",
+        outcome: "positive",
+        notes: "HCP agenda approved",
+        nextCallDate: addBusinessDays(isoToday(), 2)
+      },
+      {
+        id: "ACT-2",
+        dateTime: new Date().toISOString(),
+        oppId: "OPP-103",
+        type: "po_received",
+        outcome: "positive",
+        notes: "PO shared by procurement",
+        nextCallDate: null
+      }
+    ];
+
+    let invoices = [
+      {
+        id: "INV-2501",
+        entity: "Medflix",
+        invoiceType: "Regular",
+        docType: "INV",
+        invNo: "MDF/INV/26-2501",
+        linkedPi: "",
+        po: "PO-SUN-3812",
+        oppId: "OPP-106",
+        companyId: "sun",
+        divisionId: "sun-arian",
+        offeringCategory: "Virtual Events",
+        offeringType: "Webinar",
+        sac: "9983",
+        desc: "Webinar execution and doctor engagement services",
+        clientGstin: "27AAACS0229G1ZO",
+        clientState: "Maharashtra",
+        creditDays: 45,
+        expectedFY: fySet.current,
+        invoiceDate: "2026-03-11",
+        dueDate: "2026-04-25",
+        expectedPaymentDate: "2026-04-28",
+        currency: "INR",
+        fxRate: 1,
+        gross: 850000,
+        discount: 0,
+        preTax: 850000,
+        gstRate: 18,
+        gst: 153000,
+        total: 1003000,
+        status: "sent",
+        pendingAmount: 1003000,
+        receivedAmount: 0,
+        tdsPercent: 0,
+        tdsAmount: 0,
+        gstWithheld: false,
+        gstWithheldAmount: 0,
+        receivedDate: null
+      },
+      {
+        id: "INV-2502",
+        entity: "Medflix",
+        invoiceType: "Regular",
+        docType: "INV",
+        invNo: "MDF/INV/26-2502",
+        linkedPi: "",
+        po: "PO-PFZ-9012",
+        oppId: "OPP-103",
+        companyId: "pfizer",
+        divisionId: "pfizer-im",
+        offeringCategory: "Virtual Events",
+        offeringType: "Advisory Board",
+        sac: "9983",
+        desc: "Advisory board execution and reporting",
+        clientGstin: "27AAACP2931L1ZO",
+        clientState: "Maharashtra",
+        creditDays: 45,
+        expectedFY: fySet.current,
+        invoiceDate: "2026-02-28",
+        dueDate: "2026-04-15",
+        expectedPaymentDate: "2026-04-18",
+        currency: "INR",
+        fxRate: 1,
+        gross: 980000,
+        discount: 0,
+        preTax: 980000,
+        gstRate: 18,
+        gst: 176400,
+        total: 1156400,
+        status: "overdue",
+        pendingAmount: 1156400,
+        receivedAmount: 0,
+        tdsPercent: 0,
+        tdsAmount: 0,
+        gstWithheld: false,
+        gstWithheldAmount: 0,
+        receivedDate: null
+      },
+      {
+        id: "INV-2503",
+        entity: "Medflix",
+        invoiceType: "Regular",
+        docType: "INV",
+        invNo: "MDF/INV/26-2503",
+        linkedPi: "MDF/PI/26-1770",
+        po: "PO-ALK-4421",
+        oppId: "OPP-102",
+        companyId: "alkem",
+        divisionId: "alkem-prizma",
+        offeringCategory: "Hybrid Events",
+        offeringType: "Hybrid Conference",
+        sac: "9983",
+        desc: "Hybrid conference planning, production and analytics",
+        clientGstin: "27AAACA3088L1ZU",
+        clientState: "Maharashtra",
+        creditDays: 45,
+        expectedFY: fySet.current,
+        invoiceDate: "2026-02-14",
+        dueDate: "2026-03-30",
+        expectedPaymentDate: "2026-03-30",
+        currency: "INR",
+        fxRate: 1,
+        gross: 620000,
+        discount: 0,
+        preTax: 620000,
+        gstRate: 18,
+        gst: 111600,
+        total: 731600,
+        status: "received_full",
+        pendingAmount: 0,
+        receivedAmount: 698200,
+        tdsPercent: 2,
+        tdsAmount: 12400,
+        gstWithheld: true,
+        gstWithheldAmount: 21000,
+        receivedDate: "2026-03-02"
+      }
+    ];
+
+    let costCentres = [
+      "BD", "AICP", "Virtual Events", "Hybrid Events", "F2f Events", "Products & Tools",
+      "Rent", "Office expenses / Utilities", "Platform", "Salary", "Reimbursement"
+    ];
+
+    let costHeads = [
+      "Travel", "Stay", "Marketing (SMS, WA, Emails, SM ads)", "Faculty Fee", "Prizes",
+      "Live streaming", "Transactional (SMS, WA, E-mails)"
+    ];
+
+    let ledger = [
+      { date: "2026-03-02", centre: "Virtual Events", head: "Live streaming", amount: 86000, status: "approved", attachment: "vendor_streaming_march.pdf" },
+      { date: "2026-03-04", centre: "AICP", head: "Travel", amount: 42200, status: "paid", attachment: "travel_claim_2241.pdf" },
+      { date: "2026-03-05", centre: "Salary", head: "Transactional (SMS, WA, E-mails)", amount: 28000, status: "submitted", attachment: "bulk_sms_invoice.pdf" }
+    ];
+
+    const pageMeta = {
+      leadership: {
+        title: "Dashboard",
+        desc: "Unified pipeline, invoicing, ledger, and runway analytics with editable OPEX control."
+      },
+      opportunities: {
+        title: "Order Book",
+        desc: "Opportunity pipeline with modal-first creation, callback scheduling, and CRM activity history."
+      },
+      finance: {
+        title: "Invoicing",
+        desc: "Revenix-style invoice identity/client/financial fields with FX conversion, GST logic, and collection tracking."
+      },
+      ledger: {
+        title: "Cost Ledger",
+        desc: "Team payables intake with configurable cost centres and heads plus editable payment status."
+      },
+      accounts: {
+        title: "Accounts and Hierarchy",
+        desc: "Corrected pharma structure explorer with proper Company → Cluster → Division mapping."
+      }
+    };
+
+    const nav = document.getElementById("navTabs");
+    nav.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-page]");
+      if (!btn) return;
+      const page = btn.dataset.page;
+      [...nav.querySelectorAll("button")].forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      [...document.querySelectorAll(".page")].forEach((p) => p.classList.remove("active"));
+      document.getElementById("page-" + page).classList.add("active");
+      document.getElementById("pageTitle").textContent = pageMeta[page].title;
+      document.getElementById("pageDesc").textContent = pageMeta[page].desc;
+    });
+
+    function getAccName(id) {
+      return (flatAccounts.find((x) => x.id === id) || {}).name || "-";
+    }
+
+    function weighted(opp) {
+      const base = (opp.closedValue && (opp.stage === "won" || opp.stage === "invoiced")) ? opp.closedValue : opp.estimatedValue;
+      return base * (stageWeights[opp.stage] || 0);
+    }
+
+    function mountWeights() {
+      const ul = document.getElementById("weightList");
+      ul.innerHTML = "";
+      Object.entries(stageWeights).forEach(([k, v]) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span>${stageLabels[k]}</span><strong>${v}</strong>`;
+        ul.appendChild(li);
+      });
+    }
+
+    function fillFyDropdowns() {
+      ["oppFy", "leadFy", "invoiceFy"].forEach((id) => {
+        const s = document.getElementById(id);
+        if (!s) return;
+        s.innerHTML = "";
+        fySet.all.forEach((fy) => {
+          const op = document.createElement("option");
+          op.value = fy;
+          op.textContent = fy;
+          if (fy === fySet.current) op.selected = true;
+          s.appendChild(op);
+        });
+      });
+    }
+
+    function fillCompanySelect(selectId, includeAll = false) {
+      const el = document.getElementById(selectId);
+      if (!el) return;
+      el.innerHTML = "";
+      if (includeAll) {
+        const all = document.createElement("option");
+        all.value = "";
+        all.textContent = "All Companies";
+        el.appendChild(all);
+      }
+      companies.forEach((co) => {
+        const op = document.createElement("option");
+        op.value = co.id;
+        op.textContent = co.name;
+        el.appendChild(op);
+      });
+    }
+
+    function fillDivisionSelect(selectId, companyId, includeAll = false) {
+      const el = document.getElementById(selectId);
+      if (!el) return;
+      el.innerHTML = "";
+      if (includeAll) {
+        const all = document.createElement("option");
+        all.value = "";
+        all.textContent = "All Divisions";
+        el.appendChild(all);
+      }
+      const divisions = companyId ? (divisionsByCompany[companyId] || []) : flatAccounts.filter((a) => a.type === "division");
+      divisions.forEach((d) => {
+        const op = document.createElement("option");
+        op.value = d.id;
+        op.textContent = d.name;
+        el.appendChild(op);
+      });
+    }
+
+    function fillStageOptions() {
+      const stageSel = document.getElementById("oppStage");
+      stageSel.innerHTML = "";
+      validStages.forEach((s) => {
+        const op = document.createElement("option");
+        op.value = s;
+        op.textContent = stageLabels[s];
+        if (s === "warm") op.selected = true;
+        stageSel.appendChild(op);
+      });
+    }
+
+    function nextOppId() {
+      const max = opportunities.reduce((m, o) => Math.max(m, Number(String(o.id).split("-")[1] || 0)), 100);
+      return `OPP-${max + 1}`;
+    }
+
+    function nextActId() {
+      const max = activities.reduce((m, a) => Math.max(m, Number(String(a.id || "").split("-")[1] || 0)), 0);
+      return `ACT-${max + 1}`;
+    }
+
+    function nextInvoiceId() {
+      const max = invoices.reduce((m, i) => Math.max(m, Number(String(i.id).split("-")[1] || 0)), 2500);
+      return `INV-${max + 1}`;
+    }
+
+    function updateActivityOpportunityOptions(selectedId = "") {
+      const actSel = document.getElementById("activityOpp");
+      if (!actSel) return;
+      actSel.innerHTML = opportunities
+        .map((o) => `<option value="${o.id}">${o.id} · ${getAccName(o.companyId)} / ${getAccName(o.divisionId)} · ${o.type}</option>`)
+        .join("");
+      if (selectedId && opportunities.some((o) => o.id === selectedId)) {
+        actSel.value = selectedId;
+      }
+    }
+
+    function renderOpportunityKpis() {
+      const total = opportunities.reduce((s, o) => s + o.estimatedValue, 0);
+      const weightedTotal = opportunities.reduce((s, o) => s + weighted(o), 0);
+      const commissioned = opportunities.filter((o) => o.stage === "won" || o.stage === "invoiced");
+      const signed = commissioned.reduce((s, o) => s + (o.closedValue || o.estimatedValue), 0);
+      const contribution = opportunities.reduce((s, o) => {
+        const value = (o.closedValue && (o.stage === "won" || o.stage === "invoiced")) ? o.closedValue : o.estimatedValue;
+        return s + (value - o.estimatedCost) * (stageWeights[o.stage] || 0);
+      }, 0);
+
+      const grid = document.getElementById("opportunityKpis");
+      grid.innerHTML = "";
+      [
+        ["Total Pipeline", compact(total), `${opportunities.length} opportunities`],
+        ["Weighted Pipeline", compact(weightedTotal), "Using confirmed stage weights"],
+        ["Signed Revenue", compact(signed), `${commissioned.length} won / invoiced`],
+        ["Weighted Contribution", compact(contribution), "For runway and risk view"]
+      ].forEach((k) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<h3>${k[0]}</h3><p class="kpi">${k[1]}</p><div class="kpi-sub">${k[2]}</div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    function currentFilters() {
+      return {
+        companyId: document.getElementById("filterCompany").value,
+        divisionId: document.getElementById("filterDivision").value,
+        callsTodayOnly: document.getElementById("filterCallsToday").checked
+      };
+    }
+
+    function filteredOpportunities() {
+      const f = currentFilters();
+      return opportunities.filter((o) => {
+        if (f.companyId && o.companyId !== f.companyId) return false;
+        if (f.divisionId && o.divisionId !== f.divisionId) return false;
+        if (f.callsTodayOnly && !o.nextCallDate) return false;
+        if (f.callsTodayOnly && !sameDate(o.nextCallDate, isoToday())) return false;
+        return true;
+      });
+    }
+
+    function renderOpportunities() {
+      renderOpportunityKpis();
+      updateActivityOpportunityOptions();
+
+      const rows = document.getElementById("opportunityRows");
+      rows.innerHTML = "";
+      filteredOpportunities().forEach((opp) => {
+        const w = stageWeights[opp.stage] || 0;
+        const weightedVal = weighted(opp);
+        const closedOrDash = opp.closedValue ? compact(opp.closedValue) : "—";
+        const delta = opp.closedValue ? compact(opp.closedValue - opp.estimatedValue) : "—";
+        const dueToday = opp.nextCallDate && sameDate(opp.nextCallDate, isoToday());
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${opp.id}</td>
+          <td>${getAccName(opp.companyId)}</td>
+          <td>${getAccName(opp.divisionId)}</td>
+          <td>${opp.category}</td>
+          <td>${opp.type}</td>
+          <td>${compact(opp.estimatedValue)}</td>
+          <td>${compact(opp.estimatedCost)}</td>
+          <td>
+            <select class="table-select" data-stage-select="${opp.id}">
+              ${validStages.map((s) => `<option value="${s}" ${s === opp.stage ? "selected" : ""}>${stageLabels[s]}</option>`).join("")}
+            </select>
+          </td>
+          <td>${w}</td>
+          <td>${compact(weightedVal)}</td>
+          <td>${opp.nextCallDate ? `${formatDate(opp.nextCallDate)}${dueToday ? " · Due" : ""}` : "—"}</td>
+          <td>${closedOrDash}</td>
+          <td>${delta}</td>
+          <td>
+            <div class="toolbar" style="margin:0;">
+              <button class="btn soft btn.icon" title="View Logs" data-view-logs="${opp.id}">👁</button>
+              <button class="btn soft" data-log-opp="${opp.id}">+ Log</button>
+            </div>
+          </td>
+        `;
+        rows.appendChild(tr);
+      });
+
+      rows.querySelectorAll("select[data-stage-select]").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const id = e.target.dataset.stageSelect;
+          const idx = opportunities.findIndex((o) => o.id === id);
+          if (idx < 0) return;
+          const newStage = e.target.value;
+          if (newStage === "won" || newStage === "invoiced") {
+            openStageModal(idx, newStage);
+          } else {
+            opportunities[idx].stage = newStage;
+            if (newStage === "lost" || newStage === "hold") {
+              opportunities[idx].closedValue = null;
+            }
+            renderOpportunities();
+            renderLeadership();
+          }
+        });
+      });
+
+      rows.querySelectorAll("button[data-view-logs]").forEach((btn) => {
+        btn.addEventListener("click", (e) => openActivityHistoryModal(e.target.dataset.viewLogs));
+      });
+
+      rows.querySelectorAll("button[data-log-opp]").forEach((btn) => {
+        btn.addEventListener("click", (e) => openLogModal(e.target.dataset.logOpp));
+      });
+    }
+
+    function openOpportunityModal() {
+      fillCompanySelect("oppCompany");
+      fillDivisionSelect("oppDivision", document.getElementById("oppCompany").value);
+      document.getElementById("oppFy").value = fySet.current;
+      document.getElementById("oppValue").value = 1200000;
+      document.getElementById("oppCost").value = 780000;
+      document.getElementById("oppStage").value = "warm";
+      document.getElementById("opportunityModal").classList.add("open");
+    }
+
+    function closeOpportunityModal() {
+      document.getElementById("opportunityModal").classList.remove("open");
+    }
+
+    function saveOpportunity() {
+      const payload = {
+        id: nextOppId(),
+        companyId: document.getElementById("oppCompany").value,
+        divisionId: document.getElementById("oppDivision").value,
+        category: document.getElementById("oppCategory").value,
+        type: document.getElementById("oppType").value,
+        estimatedValue: Number(document.getElementById("oppValue").value || 0),
+        estimatedCost: Number(document.getElementById("oppCost").value || 0),
+        stage: document.getElementById("oppStage").value,
+        expectedFY: document.getElementById("oppFy").value || fySet.current,
+        closedValue: null,
+        closeRemark: "",
+        nextCallDate: addBusinessDays(isoToday(), 3)
+      };
+
+      opportunities.unshift(payload);
+      closeOpportunityModal();
+      renderOpportunities();
+      renderLeadership();
+    }
+
+    let pendingStageEdit = null;
+
+    function openStageModal(oppIndex, newStage) {
+      pendingStageEdit = { oppIndex, newStage };
+      const opp = opportunities[oppIndex];
+      document.getElementById("stageModalText").textContent =
+        `${opp.id} · ${getAccName(opp.companyId)} / ${getAccName(opp.divisionId)} moved to ${stageLabels[newStage]}. Capture closed value for discount tracking.`;
+      document.getElementById("closedValueInput").value = opp.closedValue || opp.estimatedValue;
+      document.getElementById("closedRemarkInput").value = opp.closeRemark || "";
+      document.getElementById("stageModal").classList.add("open");
+    }
+
+    function closeStageModal() {
+      pendingStageEdit = null;
+      document.getElementById("stageModal").classList.remove("open");
+    }
+
+    function saveStageModal() {
+      if (!pendingStageEdit) return;
+      const { oppIndex, newStage } = pendingStageEdit;
+      const v = Number(document.getElementById("closedValueInput").value || 0);
+      opportunities[oppIndex].stage = newStage;
+      opportunities[oppIndex].closedValue = v;
+      opportunities[oppIndex].closeRemark = document.getElementById("closedRemarkInput").value || "";
+      closeStageModal();
+      renderOpportunities();
+      renderLeadership();
+      renderFinance();
+    }
+
+    function defaultNextCallDate() {
+      return addBusinessDays(isoToday(), 3);
+    }
+
+    function openLogModal(prefillOppId = "") {
+      updateActivityOpportunityOptions(prefillOppId);
+      document.getElementById("activityType").value = "call_attempted";
+      document.getElementById("activityOutcome").value = "neutral";
+      document.getElementById("activityNotes").value = "";
+      document.getElementById("nextCallDateInput").value = defaultNextCallDate();
+      syncLogModalFields();
+      document.getElementById("logModal").classList.add("open");
+    }
+
+    function closeLogModal() {
+      document.getElementById("logModal").classList.remove("open");
+    }
+
+    function syncLogModalFields() {
+      const type = document.getElementById("activityType").value;
+      const wrap = document.getElementById("nextCallDateWrap");
+      wrap.style.display = type === "callback_later" || type === "call_attempted" || type === "call_connected" ? "grid" : "none";
+      if (type === "callback_later" && !document.getElementById("nextCallDateInput").value) {
+        document.getElementById("nextCallDateInput").value = defaultNextCallDate();
+      }
+    }
+
+    function logActivity() {
+      const oppId = document.getElementById("activityOpp").value;
+      const type = document.getElementById("activityType").value;
+      const outcome = document.getElementById("activityOutcome").value;
+      const notes = document.getElementById("activityNotes").value;
+      const nextCallDate = document.getElementById("nextCallDateInput").value || null;
+      const opp = opportunities.find((o) => o.id === oppId);
+
+      activities.unshift({
+        id: nextActId(),
+        dateTime: new Date().toISOString(),
+        oppId,
+        type,
+        outcome,
+        notes,
+        nextCallDate
+      });
+
+      if (opp && nextCallDate) {
+        opp.nextCallDate = nextCallDate;
+      }
+
+      const stageFromActivity = {
+        meeting_done: "warm",
+        proposal_sent: "hot",
+        proposal_revised: "hot",
+        po_received: "won"
+      };
+
+      if (opp && stageFromActivity[type]) {
+        opp.stage = stageFromActivity[type];
+        if (type === "po_received" && !opp.closedValue) {
+          opp.closedValue = opp.estimatedValue;
+        }
+      }
+
+      closeLogModal();
+      renderOpportunities();
+      renderLeadership();
+      renderFinance();
+    }
+
+    function openActivityHistoryModal(oppId) {
+      const opp = opportunities.find((o) => o.id === oppId);
+      document.getElementById("activityHistoryTitle").textContent =
+        `CRM Log Details · ${oppId} · ${opp ? `${getAccName(opp.companyId)} / ${getAccName(opp.divisionId)}` : ""}`;
+
+      const rows = document.getElementById("activityHistoryRows");
+      const logs = activities.filter((a) => a.oppId === oppId);
+      rows.innerHTML = "";
+      if (!logs.length) {
+        rows.innerHTML = `<tr><td colspan="5" class="muted-note">No logs for this opportunity yet.</td></tr>`;
+      } else {
+        logs.forEach((a) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${formatDateTime(a.dateTime)}</td>
+            <td>${a.type}</td>
+            <td>${a.outcome}</td>
+            <td>${a.nextCallDate ? formatDate(a.nextCallDate) : "—"}</td>
+            <td>${a.notes || "—"}</td>
+          `;
+          rows.appendChild(tr);
+        });
+      }
+      document.getElementById("activityHistoryModal").classList.add("open");
+    }
+
+    function closeActivityHistoryModal() {
+      document.getElementById("activityHistoryModal").classList.remove("open");
+    }
+
+    function renderAccounts(search = "") {
+      const tree = document.getElementById("accountTree");
+      tree.innerHTML = "";
+      const lower = search.trim().toLowerCase();
+      hierarchy.forEach((root) => {
+        const n = buildTreeNode(root, lower);
+        if (n) tree.appendChild(n);
+      });
+
+      const summary = document.getElementById("hierarchySummary");
+      const counts = flatAccounts.reduce((acc, x) => {
+        acc[x.type] = (acc[x.type] || 0) + 1;
+        return acc;
+      }, {});
+      summary.innerHTML = `
+        <p><strong>Total nodes:</strong> ${flatAccounts.length}</p>
+        <p><strong>Companies:</strong> ${counts.company || 0} · <strong>Clusters:</strong> ${counts.cluster || 0} · <strong>Divisions:</strong> ${counts.division || 0}</p>
+      `;
+
+      const adminRows = document.getElementById("adminFixRows");
+      adminRows.innerHTML = "";
+      [
+        ["Akuna", "division", "Sun Pharma > CVD", "Corrected"],
+        ["Amaze", "division", "Sun Pharma > CVD", "Corrected"],
+        ["Arian", "division", "Sun Pharma > CVD", "Corrected"],
+        ["Avior", "division", "Sun Pharma > CVD", "Corrected"],
+        ["Pentacare", "division", "Alkem", "Corrected"],
+        ["Prizma", "division", "Alkem", "Corrected"],
+        ["Suprema", "division", "Alkem", "Corrected"]
+      ].forEach((x) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${x[0]}</td><td><span class="pill division">${x[1]}</span></td><td>${x[2]}</td><td><span class="chip">${x[3]}</span></td>`;
+        adminRows.appendChild(tr);
+      });
+    }
+
+    function buildTreeNode(node, searchLower = "") {
+      const wrap = document.createElement("div");
+      wrap.className = "tree-node";
+
+      const hasChildren = (node.children || []).length > 0;
+      const matches = node.name.toLowerCase().includes(searchLower);
+      const childMatches = hasChildren ? node.children.some((c) => JSON.stringify(c).toLowerCase().includes(searchLower)) : false;
+      if (searchLower && !matches && !childMatches) return null;
+
+      const head = document.createElement("div");
+      head.className = "tree-head";
+      head.innerHTML = `
+        <span class="caret">${hasChildren ? "▸" : "•"}</span>
+        <span class="pill ${node.type}">${node.type}</span>
+        <strong>${node.name}</strong>
+      `;
+      wrap.appendChild(head);
+
+      if (hasChildren) {
+        const kids = document.createElement("div");
+        kids.className = "children";
+        node.children.forEach((ch) => {
+          const childNode = buildTreeNode(ch, searchLower);
+          if (childNode) kids.appendChild(childNode);
+        });
+        wrap.appendChild(kids);
+        head.addEventListener("click", () => {
+          kids.classList.toggle("open");
+          head.querySelector(".caret").textContent = kids.classList.contains("open") ? "▾" : "▸";
+        });
+
+        if (searchLower) {
+          kids.classList.add("open");
+          head.querySelector(".caret").textContent = "▾";
+        }
+      }
+      return wrap;
+    }
+
+    function toggleAll(open) {
+      document.querySelectorAll(".children").forEach((c) => c.classList.toggle("open", open));
+      document.querySelectorAll(".tree-head .caret").forEach((c) => {
+        if (c.textContent !== "•") c.textContent = open ? "▾" : "▸";
+      });
+    }
+
+    function syncInvoiceCompanyDivision() {
+      const companyId = document.getElementById("invoiceCompany").value;
+      fillDivisionSelect("invoiceDivision", companyId);
+      const profile = companyInvoiceMeta[companyId] || { gstin: "", state: "", creditDays: 45 };
+      document.getElementById("invoiceClientGstin").value = profile.gstin;
+      document.getElementById("invoiceClientState").value = profile.state;
+      document.getElementById("invoiceCreditDays").value = profile.creditDays;
+      updateDueDateFromCreditDays();
+      syncInvoiceOpportunityOptions();
+    }
+
+    function syncInvoiceOpportunityOptions() {
+      const companyId = document.getElementById("invoiceCompany").value;
+      const divisionId = document.getElementById("invoiceDivision").value;
+      const oppSelect = document.getElementById("invoiceOpp");
+      const list = opportunities.filter((o) => {
+        if (companyId && o.companyId !== companyId) return false;
+        if (divisionId && o.divisionId !== divisionId) return false;
+        return true;
+      });
+      oppSelect.innerHTML = `<option value="">Not linked</option>` +
+        list.map((o) => `<option value="${o.id}">${o.id} · ${o.type}</option>`).join("");
+    }
+
+    function syncInvoiceFromOpportunity() {
+      const oppId = document.getElementById("invoiceOpp").value;
+      if (!oppId) return;
+      const opp = opportunities.find((o) => o.id === oppId);
+      if (!opp) return;
+
+      if (opp.expectedFY) {
+        document.getElementById("invoiceFy").value = opp.expectedFY;
+      }
+
+      if (offeringCatalog[opp.category]) {
+        document.getElementById("invoiceCategory").value = opp.category;
+        syncInvoiceOfferings();
+        const offeringSel = document.getElementById("invoiceOffering");
+        if ([...offeringSel.options].some((o) => o.value === opp.type)) {
+          offeringSel.value = opp.type;
+        }
+        applyOfferingDefaults();
+      }
+
+      document.getElementById("invoiceGross").value = opp.closedValue || opp.estimatedValue || 0;
+      document.getElementById("invoiceDiscount").value = 0;
+      updateInvoiceTotals();
+    }
+
+    function fillInvoiceCategories() {
+      const catSel = document.getElementById("invoiceCategory");
+      catSel.innerHTML = Object.keys(offeringCatalog)
+        .map((cat) => `<option value="${cat}">${cat}</option>`)
+        .join("");
+      syncInvoiceOfferings();
+    }
+
+    function syncInvoiceOfferings() {
+      const category = document.getElementById("invoiceCategory").value;
+      const offeringSel = document.getElementById("invoiceOffering");
+      const offerings = offeringCatalog[category] || [];
+      offeringSel.innerHTML = offerings.map((o) => `<option value="${o.name}">${o.name}</option>`).join("");
+      applyOfferingDefaults();
+    }
+
+    function applyOfferingDefaults() {
+      const category = document.getElementById("invoiceCategory").value;
+      const offering = document.getElementById("invoiceOffering").value;
+      const data = (offeringCatalog[category] || []).find((x) => x.name === offering);
+      if (!data) return;
+      document.getElementById("invoiceSac").value = data.sac;
+      document.getElementById("invoiceGstRate").value = data.gstRate;
+      updateInvoiceTotals();
+    }
+
+    function syncInvoiceFxRate() {
+      const currency = document.getElementById("invoiceCurrency").value;
+      document.getElementById("invoiceFxRate").value = fxRates[currency] || 1;
+      updateInvoiceTotals();
+    }
+
+    function updateDueDateFromCreditDays() {
+      const invoiceDate = document.getElementById("invoiceDate").value || isoToday();
+      const creditDays = Number(document.getElementById("invoiceCreditDays").value || 45);
+      const due = addCalendarDays(invoiceDate, creditDays);
+      document.getElementById("invoiceDueDate").value = due;
+      if (!document.getElementById("invoiceExpectedPaymentDate").value) {
+        document.getElementById("invoiceExpectedPaymentDate").value = due;
+      }
+    }
+
+    function updateInvoiceTotals() {
+      const gross = Number(document.getElementById("invoiceGross").value || 0);
+      const discount = Number(document.getElementById("invoiceDiscount").value || 0);
+      const fxRate = Number(document.getElementById("invoiceFxRate").value || 1);
+      const netInCurrency = Math.max(gross - discount, 0);
+      const preTax = Math.round(netInCurrency * fxRate);
+      const gstRate = Number(document.getElementById("invoiceGstRate").value || 0);
+      const gst = Math.round((preTax * gstRate) / 100);
+      const total = preTax + gst;
+      document.getElementById("invoicePreTax").value = preTax;
+      document.getElementById("invoiceGstValue").value = Math.round(gst);
+      document.getElementById("invoiceTotalValue").value = Math.round(total);
+    }
+
+    function openInvoiceModal() {
+      fillCompanySelect("invoiceCompany");
+      fillInvoiceCategories();
+      syncInvoiceCompanyDivision();
+      syncInvoiceFxRate();
+      document.getElementById("invoiceFy").value = fySet.current;
+      const today = isoToday();
+      document.getElementById("invoiceEntity").value = "Medflix";
+      document.getElementById("invoiceType").value = "Regular";
+      document.getElementById("invoiceDocType").value = "INV";
+      document.getElementById("invoiceNo").value = `MDF/INV/${String(new Date().getFullYear()).slice(2)}-${String(nextInvoiceId().split("-")[1])}`;
+      document.getElementById("invoiceLinkedPi").value = "";
+      document.getElementById("invoicePo").value = "";
+      document.getElementById("invoiceDesc").value = "";
+      document.getElementById("invoiceCurrency").value = "INR";
+      document.getElementById("invoiceFxRate").value = 1;
+      document.getElementById("invoiceDate").value = today;
+      document.getElementById("invoiceCreditDays").value = 45;
+      document.getElementById("invoiceDueDate").value = addCalendarDays(today, 45);
+      document.getElementById("invoiceExpectedPaymentDate").value = addCalendarDays(today, 45);
+      document.getElementById("invoiceGross").value = 500000;
+      document.getElementById("invoiceDiscount").value = 0;
+      document.getElementById("invoiceGstRate").value = 18;
+      document.getElementById("invoiceStatus").value = "sent";
+      updateInvoiceTotals();
+      document.getElementById("invoiceModal").classList.add("open");
+    }
+
+    function closeInvoiceModal() {
+      document.getElementById("invoiceModal").classList.remove("open");
+    }
+
+    function createInvoice() {
+      const preTax = Number(document.getElementById("invoicePreTax").value || 0);
+      const gstRate = Number(document.getElementById("invoiceGstRate").value || 18);
+      const gst = Math.round((preTax * gstRate) / 100);
+      const total = preTax + gst;
+      const oppId = document.getElementById("invoiceOpp").value || null;
+      const linkedOpp = opportunities.find((o) => o.id === oppId);
+      const companyId = document.getElementById("invoiceCompany").value;
+      const divisionId = document.getElementById("invoiceDivision").value;
+      const creditDays = Number(document.getElementById("invoiceCreditDays").value || 45);
+      const invoiceDate = document.getElementById("invoiceDate").value || isoToday();
+      const dueDate = document.getElementById("invoiceDueDate").value || addCalendarDays(invoiceDate, creditDays);
+      const expectedPaymentDate = document.getElementById("invoiceExpectedPaymentDate").value || dueDate;
+
+      invoices.unshift({
+        id: nextInvoiceId(),
+        entity: document.getElementById("invoiceEntity").value,
+        invoiceType: document.getElementById("invoiceType").value,
+        docType: document.getElementById("invoiceDocType").value,
+        invNo: document.getElementById("invoiceNo").value || nextInvoiceId(),
+        linkedPi: document.getElementById("invoiceLinkedPi").value || "",
+        po: document.getElementById("invoicePo").value || "",
+        oppId,
+        companyId,
+        divisionId,
+        offeringCategory: document.getElementById("invoiceCategory").value,
+        offeringType: document.getElementById("invoiceOffering").value,
+        sac: document.getElementById("invoiceSac").value || "9983",
+        desc: document.getElementById("invoiceDesc").value || "",
+        clientGstin: document.getElementById("invoiceClientGstin").value || "",
+        clientState: document.getElementById("invoiceClientState").value || "",
+        creditDays,
+        expectedFY: document.getElementById("invoiceFy").value || fySet.current,
+        invoiceDate,
+        dueDate,
+        expectedPaymentDate,
+        currency: document.getElementById("invoiceCurrency").value || "INR",
+        fxRate: Number(document.getElementById("invoiceFxRate").value || 1),
+        gross: Number(document.getElementById("invoiceGross").value || 0),
+        discount: Number(document.getElementById("invoiceDiscount").value || 0),
+        preTax,
+        gstRate,
+        gst,
+        total,
+        status: document.getElementById("invoiceStatus").value,
+        pendingAmount: total,
+        receivedAmount: 0,
+        tdsPercent: 0,
+        tdsAmount: 0,
+        gstWithheld: false,
+        gstWithheldAmount: 0,
+        receivedDate: null,
+        notes: linkedOpp ? `Linked to ${linkedOpp.id}` : ""
+      });
+
+      closeInvoiceModal();
+      renderFinance();
+      renderLeadership();
+    }
+
+    let invoiceEditIdx = null;
+
+    function selectedTdsPercent() {
+      const preset = document.getElementById("tdsPreset").value;
+      if (preset === "other") {
+        return Number(document.getElementById("tdsCustom").value || 0);
+      }
+      return Number(preset || 0);
+    }
+
+    function paymentComputation() {
+      if (invoiceEditIdx === null) return null;
+      const inv = invoices[invoiceEditIdx];
+      const paymentType = document.getElementById("paymentType").value;
+      const tdsPercent = selectedTdsPercent();
+      const tdsAmount = (inv.preTax * tdsPercent) / 100;
+      const gstWithheld = document.getElementById("gstWithheldFlag").value === "yes";
+      const gstWithheldAmount = gstWithheld ? Math.round((inv.preTax * 18) / 100) : 0;
+      let receivedAmount = 0;
+      let pendingAmount = inv.total;
+
+      if (paymentType === "received_full") {
+        receivedAmount = Math.max(inv.total - tdsAmount - gstWithheldAmount, 0);
+        pendingAmount = 0;
+      } else {
+        receivedAmount = Number(document.getElementById("partialAmount").value || 0);
+        pendingAmount = Math.max(inv.total - receivedAmount, 0);
+      }
+
+      return {
+        paymentType,
+        tdsPercent,
+        tdsAmount,
+        gstWithheld,
+        gstWithheldAmount,
+        receivedAmount,
+        pendingAmount
+      };
+    }
+
+    function syncPaymentFields() {
+      const preset = document.getElementById("tdsPreset").value;
+      document.getElementById("tdsCustomWrap").style.display = preset === "other" ? "grid" : "none";
+
+      const partial = document.getElementById("paymentType").value === "received_partial";
+      document.getElementById("partialAmountWrap").style.display = partial ? "grid" : "none";
+      if (partial && Number(document.getElementById("partialAmount").value || 0) <= 0 && invoiceEditIdx !== null) {
+        document.getElementById("partialAmount").value = invoices[invoiceEditIdx].total;
+      }
+      updatePaymentSummary();
+    }
+
+    function updatePaymentSummary() {
+      const comp = paymentComputation();
+      if (!comp) return;
+      const inv = invoices[invoiceEditIdx];
+      document.getElementById("paymentCalcSummary").innerHTML = `
+        Invoice Total: <strong>${inr(inv.total)}</strong> ·
+        TDS (${pct(comp.tdsPercent)}): <strong>${inr(comp.tdsAmount)}</strong> ·
+        GST Withheld: <strong>${comp.gstWithheld ? inr(comp.gstWithheldAmount) : "No"}</strong> ·
+        Received: <strong>${inr(comp.receivedAmount)}</strong> ·
+        Pending: <strong>${inr(comp.pendingAmount)}</strong>
+      `;
+    }
+
+    function openPaymentModal(idx) {
+      invoiceEditIdx = idx;
+      const inv = invoices[idx];
+      document.getElementById("paymentModalText").textContent =
+        `${inv.invNo || inv.id} · ${getAccName(inv.companyId)} / ${getAccName(inv.divisionId)} · Total ${inr(inv.total)}`;
+      document.getElementById("paymentType").value = inv.status === "received_partial" ? "received_partial" : "received_full";
+
+      if ([0, 2, 10].includes(Number(inv.tdsPercent))) {
+        document.getElementById("tdsPreset").value = String(inv.tdsPercent);
+        document.getElementById("tdsCustom").value = 0;
+      } else {
+        document.getElementById("tdsPreset").value = "other";
+        document.getElementById("tdsCustom").value = inv.tdsPercent || 0;
+      }
+
+      document.getElementById("gstWithheldFlag").value = inv.gstWithheld ? "yes" : "no";
+      document.getElementById("partialAmount").value = inv.receivedAmount || inv.total;
+      document.getElementById("receivedDate").value = inv.receivedDate || isoToday();
+      syncPaymentFields();
+      document.getElementById("paymentModal").classList.add("open");
+    }
+
+    function closePaymentModal() {
+      invoiceEditIdx = null;
+      document.getElementById("paymentModal").classList.remove("open");
+    }
+
+    function savePaymentModal() {
+      if (invoiceEditIdx === null) return;
+      const inv = invoices[invoiceEditIdx];
+      const comp = paymentComputation();
+      inv.status = comp.paymentType;
+      inv.tdsPercent = comp.tdsPercent;
+      inv.tdsAmount = comp.tdsAmount;
+      inv.gstWithheld = comp.gstWithheld;
+      inv.gstWithheldAmount = comp.gstWithheldAmount;
+      inv.receivedAmount = comp.receivedAmount;
+      inv.pendingAmount = comp.pendingAmount;
+      inv.receivedDate = document.getElementById("receivedDate").value;
+      closePaymentModal();
+      renderFinance();
+      renderLeadership();
+    }
+
+    function fillInvoiceFilterOptions() {
+      const entitySel = document.getElementById("invoiceEntityFilter");
+      const statusSel = document.getElementById("invoiceStatusFilter");
+      const offeringSel = document.getElementById("invoiceOfferingFilter");
+      const entities = Array.from(new Set(invoices.map((i) => i.entity || "Medflix")));
+      const statuses = Array.from(new Set(invoices.map((i) => i.status)));
+      const offerings = Array.from(
+        new Set(
+          invoices
+            .map((i) => `${i.offeringCategory || "—"} / ${i.offeringType || "—"}`)
+            .filter((v) => v !== "— / —")
+        )
+      );
+
+      const setOptions = (el, baseLabel, list) => {
+        const current = el.value;
+        el.innerHTML = `<option value="">${baseLabel}</option>` + list.map((x) => `<option value="${x}">${x}</option>`).join("");
+        if (current && list.includes(current)) el.value = current;
+      };
+
+      setOptions(entitySel, "All Entities", entities);
+      setOptions(statusSel, "All Status", statuses);
+      setOptions(offeringSel, "All Offerings", offerings);
+    }
+
+    function getFilteredInvoices() {
+      const search = (document.getElementById("invoiceSearch").value || "").trim().toLowerCase();
+      const entity = document.getElementById("invoiceEntityFilter").value;
+      const status = document.getElementById("invoiceStatusFilter").value;
+      const offering = document.getElementById("invoiceOfferingFilter").value;
+
+      return invoices.filter((inv) => {
+        if (entity && (inv.entity || "Medflix") !== entity) return false;
+        if (status && inv.status !== status) return false;
+        if (offering && `${inv.offeringCategory || "—"} / ${inv.offeringType || "—"}` !== offering) return false;
+        if (!search) return true;
+        const text = [
+          inv.id, inv.invNo, inv.po, inv.desc, getAccName(inv.companyId), getAccName(inv.divisionId)
+        ]
+          .join(" ")
+          .toLowerCase();
+        return text.includes(search);
+      });
+    }
+
+    function renderFinance() {
+      fillInvoiceFilterOptions();
+      const receivables = invoices.reduce((s, i) => s + (i.pendingAmount || 0), 0);
+      const collections = invoices.reduce((s, i) => s + (i.receivedAmount || 0), 0);
+      const outflow = ledger.filter((l) => l.status === "approved" || l.status === "paid").reduce((s, l) => s + l.amount, 0);
+
+      document.getElementById("recvKpi").textContent = compact(receivables);
+      document.getElementById("recvSub").textContent = `${invoices.filter((i) => (i.pendingAmount || 0) > 0).length} open invoices`;
+      document.getElementById("collectionKpi").textContent = compact(collections);
+      document.getElementById("outflowKpi").textContent = compact(outflow);
+
+      const rows = document.getElementById("invoiceRows");
+      rows.innerHTML = "";
+      getFilteredInvoices().forEach((inv) => {
+        const idx = invoices.findIndex((x) => x.id === inv.id);
+        const statusPill = inv.status === "sent" ? "warm"
+          : inv.status === "unpaid" ? "warm"
+          : inv.status === "overdue" ? "hot"
+          : inv.status === "received_full" ? "won"
+          : inv.status === "received_partial" ? "renewal"
+          : inv.status === "cancelled" ? "lost"
+          : "hold";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${inv.invNo || inv.id}</td>
+          <td>${inv.entity || "Medflix"}</td>
+          <td>${inv.docType || "INV"}</td>
+          <td>${getAccName(inv.companyId)} / ${getAccName(inv.divisionId)}</td>
+          <td>${inv.offeringCategory || "—"} / ${inv.offeringType || "—"}</td>
+          <td>${inv.expectedFY}</td>
+          <td>${formatDate(inv.invoiceDate)}</td>
+          <td>${formatDate(inv.dueDate)}</td>
+          <td>${inv.creditDays || 45}</td>
+          <td>${formatDate(inv.expectedPaymentDate)}</td>
+          <td>${inv.currency || "INR"}</td>
+          <td>${inr((inv.gross || inv.preTax || 0) * (inv.fxRate || 1))}</td>
+          <td>${inr((inv.discount || 0) * (inv.fxRate || 1))}</td>
+          <td>${inr(inv.preTax)}</td>
+          <td>${inr(inv.gst)}</td>
+          <td>${inr(inv.total)}</td>
+          <td><span class="pill ${statusPill}">${inv.status.replace("_", " ")}</span></td>
+          <td>${inr(inv.pendingAmount || 0)}</td>
+          <td>${inv.tdsPercent ? `${pct(inv.tdsPercent)} (${inr(inv.tdsAmount || 0)})` : "—"}</td>
+          <td>${inv.gstWithheld ? inr(inv.gstWithheldAmount || Math.round((inv.preTax * 18) / 100)) : "No"}</td>
+          <td><button class="btn soft" data-receive="${idx}">Mark Received</button></td>
+        `;
+        rows.appendChild(tr);
+      });
+
+      rows.querySelectorAll("button[data-receive]").forEach((b) => {
+        b.addEventListener("click", (e) => openPaymentModal(Number(e.target.dataset.receive)));
+      });
+
+      const collectionsByMonth = {};
+      invoices.forEach((i) => {
+        const key = (i.expectedPaymentDate || i.dueDate || isoToday()).slice(0, 7);
+        const amount = i.pendingAmount > 0 ? i.pendingAmount : i.receivedAmount;
+        collectionsByMonth[key] = (collectionsByMonth[key] || 0) + amount;
+      });
+      renderBars(document.getElementById("collectionsBars"), collectionsByMonth, "#0057ff");
+
+      const costsByMonth = {};
+      ledger.forEach((l) => {
+        const key = (l.date || isoToday()).slice(0, 7);
+        costsByMonth[key] = (costsByMonth[key] || 0) + l.amount;
+      });
+
+      const netMap = {};
+      const keys = new Set([...Object.keys(collectionsByMonth), ...Object.keys(costsByMonth)]);
+      keys.forEach((k) => {
+        netMap[k] = (collectionsByMonth[k] || 0) - (costsByMonth[k] || 0);
+      });
+      renderBars(document.getElementById("netCashBars"), netMap, "#00a26d");
+    }
+
+    function fillCostDropdowns() {
+      document.getElementById("ledgerCenter").innerHTML = costCentres.map((x) => `<option>${x}</option>`).join("");
+      document.getElementById("ledgerHead").innerHTML = costHeads.map((x) => `<option>${x}</option>`).join("");
+    }
+
+    function renderCostMasterTables() {
+      document.getElementById("centerRows").innerHTML = costCentres.map((x) => `<tr><td>${x}</td></tr>`).join("");
+      document.getElementById("headRows").innerHTML = costHeads.map((x) => `<tr><td>${x}</td></tr>`).join("");
+    }
+
+    function renderLedger() {
+      renderCostMasterTables();
+      fillCostDropdowns();
+
+      const rows = document.getElementById("ledgerRows");
+      rows.innerHTML = "";
+      ledger.forEach((l, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${formatDate(l.date)}</td>
+          <td>${l.centre}</td>
+          <td>${l.head}</td>
+          <td>${inr(l.amount)}</td>
+          <td>
+            <select class="table-select" data-ledger-status="${idx}">
+              <option value="submitted" ${l.status === "submitted" ? "selected" : ""}>submitted</option>
+              <option value="approved" ${l.status === "approved" ? "selected" : ""}>approved</option>
+              <option value="paid" ${l.status === "paid" ? "selected" : ""}>paid</option>
+            </select>
+          </td>
+          <td>${l.attachment || "—"}</td>
+        `;
+        rows.appendChild(tr);
+      });
+
+      rows.querySelectorAll("select[data-ledger-status]").forEach((sel) => {
+        sel.addEventListener("change", (e) => {
+          const idx = Number(e.target.dataset.ledgerStatus);
+          ledger[idx].status = e.target.value;
+          renderFinance();
+          renderLeadership();
+        });
+      });
+
+      const byCentre = ledger.reduce((acc, l) => {
+        acc[l.centre] = (acc[l.centre] || 0) + l.amount;
+        return acc;
+      }, {});
+      const byHead = ledger.reduce((acc, l) => {
+        acc[l.head] = (acc[l.head] || 0) + l.amount;
+        return acc;
+      }, {});
+      renderBars(document.getElementById("costCentreBars"), byCentre, "#0057ff");
+      renderBars(document.getElementById("costHeadBars"), byHead, "#00a26d");
+    }
+
+    function renderBars(container, mapObj, color = "#0057ff") {
+      container.innerHTML = "";
+      const entries = Object.entries(mapObj).sort((a, b) => b[1] - a[1]);
+      if (!entries.length) {
+        container.innerHTML = `<div class="muted-note">No data</div>`;
+        return;
+      }
+      const max = entries[0][1] || 1;
+      entries.forEach(([label, value]) => {
+        const row = document.createElement("div");
+        row.className = "bar";
+        row.innerHTML = `
+          <div class="bar-label">${label}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(3, (value / max) * 100)}%; background:${color};"></div></div>
+          <div class="bar-value">${compact(value)}</div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function renderLeadership() {
+      const opex = Number(document.getElementById("opexInput").value || 3500000);
+      const cash = Number(document.getElementById("cashInput").value || 0);
+      const fy = document.getElementById("leadFy").value || fySet.current;
+      const scopedOpps = opportunities.filter((o) => o.expectedFY === fy);
+      const scopedInvoices = invoices.filter((i) => i.expectedFY === fy);
+
+      const totalPipeline = scopedOpps.reduce((s, o) => s + o.estimatedValue, 0);
+      const weightedPipeline = scopedOpps.reduce((s, o) => s + weighted(o), 0);
+      const signedRevenue = scopedOpps
+        .filter((o) => o.stage === "won" || o.stage === "invoiced")
+        .reduce((s, o) => s + (o.closedValue || o.estimatedValue), 0);
+      const signedContribution = scopedOpps
+        .filter((o) => o.stage === "won" || o.stage === "invoiced")
+        .reduce((s, o) => s + ((o.closedValue || o.estimatedValue) - o.estimatedCost), 0);
+      const weightedContribution = scopedOpps
+        .reduce((s, o) => s + ((o.estimatedValue - o.estimatedCost) * (stageWeights[o.stage] || 0)), 0);
+      const runwayMonths = opex > 0 ? (cash + signedContribution + weightedContribution) / opex : 0;
+
+      const kpiWrap = document.getElementById("leadKpis");
+      kpiWrap.innerHTML = "";
+      [
+        ["Total Pipeline", compact(totalPipeline), `${scopedOpps.length} opportunities in ${fy}`],
+        ["Weighted Pipeline", compact(weightedPipeline), "Based on your locked probability map"],
+        ["Signed Revenue", compact(signedRevenue), "Won + Invoiced stages"],
+        ["Runway", runwayMonths.toFixed(1) + " months", "Uses editable OPEX + cash + contribution"]
+      ].forEach((k) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<h3>${k[0]}</h3><p class="kpi">${k[1]}</p><div class="kpi-sub">${k[2]}</div>`;
+        kpiWrap.appendChild(card);
+      });
+
+      const byStage = {};
+      scopedOpps.forEach((o) => {
+        const label = stageLabels[o.stage];
+        byStage[label] = (byStage[label] || 0) + weighted(o);
+      });
+      renderBars(document.getElementById("pipelineBars"), byStage, "#0057ff");
+
+      const byDivision = {};
+      const byAccount = {};
+      const byOffering = {};
+      scopedOpps.filter((o) => activeStages.includes(o.stage)).forEach((o) => {
+        const val = o.closedValue || o.estimatedValue;
+        const div = getAccName(o.divisionId);
+        const acc = getAccName(o.companyId);
+        byDivision[div] = (byDivision[div] || 0) + val;
+        byAccount[acc] = (byAccount[acc] || 0) + val;
+        byOffering[o.type] = (byOffering[o.type] || 0) + val;
+      });
+      renderBars(document.getElementById("divisionBars"), byDivision, "#00a26d");
+      renderBars(document.getElementById("accountBars"), byAccount, "#4169e1");
+      renderBars(document.getElementById("offeringBars"), byOffering, "#7a43d1");
+
+      const receivables = scopedInvoices.reduce((s, i) => s + (i.pendingAmount || 0), 0);
+      const monthlyOutflow = ledger
+        .filter((l) => l.status === "approved" || l.status === "paid")
+        .reduce((s, l) => s + l.amount, 0);
+
+      document.getElementById("cashRiskNote").textContent =
+        `Receivables in ${fy}: ${compact(receivables)} · Approved/Paid outflow: ${compact(monthlyOutflow)} · OPEX: ${compact(opex)} · Forecast runway: ${runwayMonths.toFixed(1)} months.`;
+    }
+
+    function bindEvents() {
+      document.getElementById("accountSearch").addEventListener("input", (e) => renderAccounts(e.target.value));
+      document.getElementById("expandAllBtn").addEventListener("click", () => toggleAll(true));
+      document.getElementById("collapseAllBtn").addEventListener("click", () => toggleAll(false));
+
+      document.getElementById("filterCompany").addEventListener("change", () => {
+        fillDivisionSelect("filterDivision", document.getElementById("filterCompany").value, true);
+        renderOpportunities();
+      });
+      document.getElementById("filterDivision").addEventListener("change", renderOpportunities);
+      document.getElementById("filterCallsToday").addEventListener("change", renderOpportunities);
+
+      document.getElementById("openOpportunityModalBtn").addEventListener("click", openOpportunityModal);
+      document.getElementById("closeOpportunityModal").addEventListener("click", closeOpportunityModal);
+      document.getElementById("cancelOpportunityModal").addEventListener("click", closeOpportunityModal);
+      document.getElementById("saveOpportunityModal").addEventListener("click", saveOpportunity);
+      document.getElementById("oppCompany").addEventListener("change", () => {
+        fillDivisionSelect("oppDivision", document.getElementById("oppCompany").value);
+      });
+
+      document.getElementById("openLogModalBtn").addEventListener("click", () => openLogModal());
+      document.getElementById("closeLogModal").addEventListener("click", closeLogModal);
+      document.getElementById("cancelLogModal").addEventListener("click", closeLogModal);
+      document.getElementById("saveLogModal").addEventListener("click", logActivity);
+      document.getElementById("activityType").addEventListener("change", syncLogModalFields);
+
+      document.getElementById("closeActivityHistoryModal").addEventListener("click", closeActivityHistoryModal);
+      document.getElementById("doneActivityHistoryModal").addEventListener("click", closeActivityHistoryModal);
+
+      document.getElementById("closeStageModal").addEventListener("click", closeStageModal);
+      document.getElementById("cancelStageModal").addEventListener("click", closeStageModal);
+      document.getElementById("saveStageModal").addEventListener("click", saveStageModal);
+
+      document.getElementById("newInvoiceBtn").addEventListener("click", openInvoiceModal);
+      document.getElementById("closeInvoiceModal").addEventListener("click", closeInvoiceModal);
+      document.getElementById("cancelInvoiceModal").addEventListener("click", closeInvoiceModal);
+      document.getElementById("saveInvoiceModal").addEventListener("click", createInvoice);
+      document.getElementById("invoiceCompany").addEventListener("change", syncInvoiceCompanyDivision);
+      document.getElementById("invoiceDivision").addEventListener("change", syncInvoiceOpportunityOptions);
+      document.getElementById("invoiceOpp").addEventListener("change", syncInvoiceFromOpportunity);
+      document.getElementById("invoiceCategory").addEventListener("change", syncInvoiceOfferings);
+      document.getElementById("invoiceOffering").addEventListener("change", applyOfferingDefaults);
+      document.getElementById("invoiceCurrency").addEventListener("change", syncInvoiceFxRate);
+      document.getElementById("invoiceDate").addEventListener("change", updateDueDateFromCreditDays);
+      document.getElementById("invoiceCreditDays").addEventListener("input", updateDueDateFromCreditDays);
+      document.getElementById("invoiceFxRate").addEventListener("input", updateInvoiceTotals);
+      document.getElementById("invoiceGross").addEventListener("input", updateInvoiceTotals);
+      document.getElementById("invoiceDiscount").addEventListener("input", updateInvoiceTotals);
+      document.getElementById("invoiceGstRate").addEventListener("input", updateInvoiceTotals);
+      document.getElementById("refreshCashflowBtn").addEventListener("click", () => {
+        renderFinance();
+        renderLeadership();
+      });
+      document.getElementById("invoiceSearch").addEventListener("input", renderFinance);
+      document.getElementById("invoiceEntityFilter").addEventListener("change", renderFinance);
+      document.getElementById("invoiceStatusFilter").addEventListener("change", renderFinance);
+      document.getElementById("invoiceOfferingFilter").addEventListener("change", renderFinance);
+
+      document.getElementById("closePaymentModal").addEventListener("click", closePaymentModal);
+      document.getElementById("cancelPaymentModal").addEventListener("click", closePaymentModal);
+      document.getElementById("savePaymentModal").addEventListener("click", savePaymentModal);
+      document.getElementById("paymentType").addEventListener("change", syncPaymentFields);
+      document.getElementById("tdsPreset").addEventListener("change", syncPaymentFields);
+      document.getElementById("tdsCustom").addEventListener("input", updatePaymentSummary);
+      document.getElementById("gstWithheldFlag").addEventListener("change", updatePaymentSummary);
+      document.getElementById("partialAmount").addEventListener("input", updatePaymentSummary);
+
+      document.getElementById("addCenterBtn").addEventListener("click", () => {
+        const v = document.getElementById("newCenterName").value.trim();
+        if (!v) return;
+        if (!costCentres.includes(v)) costCentres.push(v);
+        document.getElementById("newCenterName").value = "";
+        renderLedger();
+        renderLeadership();
+      });
+
+      document.getElementById("addHeadBtn").addEventListener("click", () => {
+        const v = document.getElementById("newHeadName").value.trim();
+        if (!v) return;
+        if (!costHeads.includes(v)) costHeads.push(v);
+        document.getElementById("newHeadName").value = "";
+        renderLedger();
+        renderLeadership();
+      });
+
+      document.getElementById("addLedgerBtn").addEventListener("click", () => {
+        const file = document.getElementById("ledgerFile").files[0];
+        ledger.unshift({
+          date: document.getElementById("ledgerDate").value || isoToday(),
+          centre: document.getElementById("ledgerCenter").value,
+          head: document.getElementById("ledgerHead").value,
+          amount: Number(document.getElementById("ledgerAmount").value || 0),
+          status: document.getElementById("ledgerStatus").value,
+          attachment: file ? file.name : "not_uploaded.pdf"
+        });
+        renderLedger();
+        renderFinance();
+        renderLeadership();
+      });
+
+      document.getElementById("applyLeadershipBtn").addEventListener("click", renderLeadership);
+    }
+
+    function init() {
+      mountWeights();
+      fillFyDropdowns();
+      fillCompanySelect("filterCompany", true);
+      fillDivisionSelect("filterDivision", "", true);
+      fillStageOptions();
+      fillCompanySelect("oppCompany");
+      fillDivisionSelect("oppDivision", document.getElementById("oppCompany").value);
+      fillCompanySelect("invoiceCompany");
+      fillInvoiceCategories();
+      syncInvoiceCompanyDivision();
+      syncInvoiceFxRate();
+      renderAccounts();
+      renderOpportunities();
+      renderFinance();
+      renderLedger();
+      renderLeadership();
+      document.getElementById("ledgerDate").value = isoToday();
+      bindEvents();
+    }
+
+    init();
+  </script>
+</body>
+</html>

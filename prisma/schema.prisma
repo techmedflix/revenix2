@@ -1,0 +1,380 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String        @id @default(cuid())
+  name             String?
+  email            String        @unique
+  image            String?
+  role             UserRole      @default(partnerships)
+  status           UserStatus    @default(pending)
+  approvedAt       DateTime?
+  approvedByUserId String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  activities       Activity[]    @relation("CreatedActivities")
+  opportunities    Opportunity[] @relation("OwnerOpportunities")
+  approvedByUser   User?         @relation("UserApprovals", fields: [approvedByUserId], references: [id])
+  approvedUsers    User[]        @relation("UserApprovals")
+
+  @@index([status])
+  @@index([role])
+}
+
+model Account {
+  id               String        @id @default(cuid())
+  name             String
+  type             AccountType
+  parentId         String?
+  msaStart         DateTime?
+  msaExpiry        DateTime?
+  gstRegistered    Boolean       @default(true)
+  vendorRegistered Boolean       @default(false)
+  vendorCode       String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  parent           Account?      @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children         Account[]     @relation("AccountHierarchy")
+  invoices         Invoice[]
+  opportunities    Opportunity[]
+  registeredEntities RegisteredEntity[]
+  pocs             Poc[]
+
+  @@unique([name, type, parentId])
+  @@index([parentId])
+  @@index([type])
+}
+
+model Poc {
+  id            String        @id @default(cuid())
+  name          String
+  accountId     String
+  email         String?
+  phone         String?
+  designation   String?
+  division      String?
+  therapyArea   String?
+  brand         String?
+  molecule      String?
+  type          PocType?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  account       Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  opportunities Opportunity[]
+
+  @@index([accountId])
+}
+
+model RegisteredEntity {
+  id        String   @id @default(cuid())
+  accountId String
+  legalName String
+  gstin     String
+  state     String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, gstin])
+  @@index([accountId])
+}
+
+model Opportunity {
+  id                String      @id @default(cuid())
+  oppNo             String?     @unique
+  accountId         String
+  ownerId           String
+  projectCategory   String      @default("virtual_events")
+  projectType       String
+  estimatedValue    Float
+  estimatedCost     Float
+  clientType        ClientType? @default(new)
+  leadType          LeadType?
+  leadStage         LeadStage?  @default(proposal)
+  probability       Int?
+  probabilityManual Boolean     @default(false)
+  expectedKickoff   DateTime?
+  nextCallDate      DateTime?
+  firstOffer        Float?
+  finalOffer        Float?
+  closedValue       Float?
+  closeRemark       String?
+  invoicedAmount    Float?      @default(0)
+  negotiationReason String?
+  clientPocId       String?
+  description       String?
+  medical           Boolean     @default(false)
+  totalQty          Int?
+  unitRevenue       Float?
+  unitCost          Float?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  activities        Activity[]
+  invoices          Invoice[]
+  account           Account     @relation(fields: [accountId], references: [id])
+  owner             User        @relation("OwnerOpportunities", fields: [ownerId], references: [id])
+  clientPoc         Poc?        @relation(fields: [clientPocId], references: [id])
+
+  @@index([ownerId])
+  @@index([accountId])
+  @@index([nextCallDate])
+  @@index([leadType])
+  @@index([leadStage])
+  @@index([clientPocId])
+}
+
+model ProjectTypeOption {
+  id          String   @id @default(cuid())
+  category    String
+  projectType String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@unique([category, projectType])
+  @@index([category])
+}
+
+model Activity {
+  id            String     @id @default(cuid())
+  opportunityId String
+  activityType  ActivityType
+  outcome       ActivityOutcome
+  notes         String?
+  nextCallDate  DateTime?
+  firstOffer    Float?
+  finalOffer    Float?
+  stageOverride LeadStage?
+  createdById   String
+  createdAt     DateTime   @default(now())
+  createdBy     User       @relation("CreatedActivities", fields: [createdById], references: [id])
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId])
+  @@index([createdById])
+}
+
+model Invoice {
+  id                  String         @id @default(cuid())
+  entity              InvoiceEntity  @default(PMD)
+  docType             InvoiceDocType @default(INV)
+  invNo               String?
+  pi                  String?
+  po                  String?
+  date                DateTime
+  effDate             DateTime?
+  fy                  String
+  expectedFY          String?
+  clientCode          String?
+  clientName          String?
+  company             String?
+  gstId               String?
+  state               String?
+  creditDays          Int            @default(45)
+  projectCategory     String?
+  offeringName        String?
+  sac                 String?
+  desc                String?
+  qty                 Int?
+  unitRevenue         Float?
+  currency            String         @default("INR")
+  fxRate              Float          @default(1)
+  gross               Float
+  disc                Float          @default(0)
+  net                 Float
+  gstRate             Float          @default(18)
+  gst                 Float
+  amt                 Float
+  dueDate             DateTime?
+  expectedPaymentDate DateTime?
+  status              InvoiceStatus  @default(draft)
+  comments            String?
+  irn                 String?
+  ackNo               String?
+  ackDate             DateTime?
+  amountReceived      Float          @default(0)
+  reminderSent        Boolean        @default(false)
+  tdsPercent          Float?
+  tdsAmount           Float?
+  gstWithheld         Boolean        @default(false)
+  gstWithheldAmount   Float?
+  receivedDate        DateTime?
+  accountId           String?
+  linkedInvoiceId     String?
+  opportunityId       String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  account             Account?       @relation(fields: [accountId], references: [id])
+  linkedInvoice       Invoice?       @relation("CreditNoteLink", fields: [linkedInvoiceId], references: [id])
+  creditNotes         Invoice[]      @relation("CreditNoteLink")
+  receipts            Receipt[]
+  opportunity         Opportunity?   @relation(fields: [opportunityId], references: [id])
+
+  @@index([fy])
+  @@index([status])
+  @@index([entity])
+  @@index([dueDate])
+  @@index([accountId])
+  @@index([linkedInvoiceId])
+  @@index([opportunityId])
+}
+
+model Receipt {
+  id                String   @id @default(cuid())
+  invoiceId         String
+  amountReceived    Float
+  receivedDate      DateTime
+  tdsPercent        Float    @default(0)
+  tdsAmount         Float    @default(0)
+  gstWithheld       Boolean  @default(false)
+  gstWithheldAmount Float    @default(0)
+  netToBank         Float
+  notes             String?
+  createdAt         DateTime @default(now())
+  invoice           Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model CostCentre {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  createdAt      DateTime        @default(now())
+  vendorInvoices VendorInvoice[]
+}
+
+model CostHead {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  createdAt      DateTime        @default(now())
+  vendorInvoices VendorInvoice[]
+}
+
+model VendorInvoice {
+  id             String            @id @default(cuid())
+  vendorName     String
+  costCentreId   String
+  costHeadId     String
+  amount         Float
+  invoiceDate    DateTime
+  paymentDueDate DateTime?
+  invoiceFileUrl String?
+  notes          String?
+  status         CostPayableStatus @default(pending)
+  paidAt         DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  costCentre     CostCentre        @relation(fields: [costCentreId], references: [id])
+  costHead       CostHead          @relation(fields: [costHeadId], references: [id])
+
+  @@index([status])
+  @@index([costCentreId])
+}
+
+model SystemSetting {
+  id                  String   @id @default(cuid())
+  monthlyOpex         Float    @default(3500000)
+  cashInBank          Float    @default(0)
+  defaultPaymentTerms Int      @default(45)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+enum AccountType {
+  company
+  cluster
+  division
+  brand
+}
+
+enum UserRole {
+  admin
+  leadership
+  partnerships
+}
+
+enum UserStatus {
+  pending
+  approved
+  revoked
+}
+
+enum ActivityType {
+  call_attempted
+  call_connected
+  meeting_scheduled
+  meeting_done
+  proposal_sent
+  proposal_revised
+  po_received
+}
+
+enum ActivityOutcome {
+  positive
+  neutral
+  budget_issue
+  no_response
+  escalated
+}
+
+enum InvoiceEntity {
+  PMD
+  Medflix
+  Metflix
+}
+
+enum InvoiceDocType {
+  INV
+  PI
+  QUOTE
+  CN
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  overdue
+  partial
+  gst_pending
+  paid
+  cancelled
+  credit_note
+}
+
+enum CostPayableStatus {
+  pending
+  approved
+  paid
+}
+
+enum ClientType {
+  new
+  existing
+}
+
+enum PocType {
+  medical
+  marketing
+}
+
+enum LeadType {
+  won
+  hot
+  warm
+  cold
+  lost
+}
+
+enum LeadStage {
+  proposal
+  pilot
+  commissioned
+  partial_invoiced
+  invoiced
+}

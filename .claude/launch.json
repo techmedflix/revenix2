@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "MedOS Dev Server",
+      "runtimeExecutable": "/Users/chirag/.nvm/versions/node/v20.20.0/bin/node",
+      "runtimeArgs": ["node_modules/.bin/next", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Prisma Studio",
+      "runtimeExecutable": "/Users/chirag/.nvm/versions/node/v20.20.0/bin/node",
+      "runtimeArgs": ["node_modules/.bin/prisma", "studio"],
+      "port": 5555
+    }
+  ]
+}

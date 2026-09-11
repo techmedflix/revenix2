@@ -1,0 +1,38 @@
+{
+  "name": "medos",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && prisma db push && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "next": "14.2.0",
+    "next-auth": "^4.24.5",
+    "react": "^18",
+    "react-dom": "^18",
+    "recharts": "^2.12.7",
+    "resend": "^3.2.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5",
+    "unpdf": "^1.8.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "eslint": "^8",
+    "eslint-config-next": "14.2.0",
+    "prisma": "^5.10.0",
+    "xlsx": "^0.18.5"
+  }
+}
